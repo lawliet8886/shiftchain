@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
-  "audited_at": "2026-08-25",
+  "audited_at": "2026-08-25T16:03:00Z",
+  "phase": "Phase 5 final pre-push",
   "scope": [
     "tracked working tree",
     "all Git patch history",
@@ -23,8 +24,13 @@
     "user_specified_real_institution_names": {"terms_recorded_in_public_artifact": false, "current_matches": 0, "history_matches": 0, "pass": true},
     "real_personal_data": {"matches": 0, "pass": true, "note": "All organization, worker, shift and message data are synthetic."},
     "generated_logs": {"tracked_matches": 0, "pass": true},
-    "browser_test_artifacts": {"remaining_untracked_matches": 0, "pass": true, "note": "Playwright snapshots, temporary screenshots and local output were removed after QA."},
-    "git_remotes": {"count": 0, "pass": true}
+    "browser_test_artifacts": {"remaining_untracked_matches": 0, "pass": true, "note": "Playwright snapshots were removed after read-only Devpost and screenshot QA."},
+    "readme_relative_links": {"broken_matches": 0, "pass": true},
+    "architecture_svg_parse": {"pass": true},
+    "public_images": {"hero": "1440x900", "reliability_proof": "272x564", "pass": true},
+    "license": {"present": false, "pass": true, "note": "No license was added automatically."},
+    "git_remotes_before_publication": {"count": 0, "pass": true},
+    "github_target": {"account": "lawliet8886", "repository": "shiftchain", "visibility": "PUBLIC", "identity_cross_check": "matched local Git author profile", "pass": true}
   },
   "allowed_public_identifiers": [
     "gen-lang-client-0643751280",
@@ -34,6 +40,6 @@
     "Google-managed project service-account identities",
     "the public Cloud Run URL"
   ],
-  "publication_boundary": "Safe for a future Git publication from tracked content. No remote, publication, upload or submission was created in Phase 4.",
+  "publication_boundary": "Safe to publish tracked content to the confirmed public GitHub repository. Video upload and final Devpost submission remain prohibited.",
   "PUBLICATION_SAFE": true
 }

@@ -91,6 +91,10 @@ The DEMO-only `LOST_ACK_AFTER_VERIFY_ONCE` fault is explicit, persisted and tran
 4. writes or observes deterministic `noop:EVT-003:g2`;
 5. returns 204 without repeating the transfer.
 
+Judge Mode intentionally simulates one lost acknowledgement after the verified business effect.
+
+![ShiftChain reliability proof](docs/images/reliability-proof.png)
+
 Real-cloud evidence: [Phase 3 gate](artifacts/PHASE3_GATE.md) and [reliability proof](artifacts/reliability_proof.json).
 
 ## Security
