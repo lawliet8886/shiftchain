@@ -683,7 +683,14 @@ class FirestoreRepository(ShiftChainRepository):
 
         return self._transaction_runner(callback)
 
-    def consume_failure_injection(self, target_event_id: str) -> bool:
+    def consume_failure_injection(
+        self,
+        target_event_id: str,
+        *,
+        resume_generation: int | None = None,
+        task_name: str | None = None,
+        task_attempt: str | None = None,
+    ) -> bool:
         """Atomically consume the lost-ack fault, but only after durable VERIFIED."""
         run_ref = self._run_ref()
         event_ref = self._event_ref(target_event_id)
@@ -711,12 +718,36 @@ class FirestoreRepository(ShiftChainRepository):
             )
             if not eligible:
                 return False
+            activity = list(event_doc.get("activity") or [])
+            activity.append(
+                {
+                    "result": "HTTP_ACKNOWLEDGEMENT_INTENTIONALLY_FAILED",
+                    "http_status": 503,
+                    "resume_generation": resume_generation,
+                    "task_name": task_name,
+                    "task_attempt": task_attempt,
+                    "occurred_at": consumed_at,
+                }
+            )
             transaction.update(
                 run_ref,
                 {
                     "failure_injection_used": True,
                     "failure_injection_consumed_at": consumed_at,
                     "failure_injection_target_event_id": target_event_id,
+                    "failure_injection_resume_generation": resume_generation,
+                    "failure_injection_task_name": task_name,
+                    "failure_injection_task_attempt": task_attempt,
+                    "failure_injection_http_status": 503,
+                    "updated_at": consumed_at,
+                },
+            )
+            transaction.update(
+                event_ref,
+                {
+                    "activity": activity,
+                    "last_attempt": consumed_at,
+                    "last_result": "HTTP_ACKNOWLEDGEMENT_INTENTIONALLY_FAILED",
                     "updated_at": consumed_at,
                 },
             )

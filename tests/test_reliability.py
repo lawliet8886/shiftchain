@@ -38,6 +38,7 @@ class FaultStore:
         self.mode = "DEMO"
         self.injection = None
         self.used = False
+        self.telemetry = None
 
 
 class ReliabilityRepositoryStub:
@@ -79,7 +80,7 @@ class ReliabilityRepositoryStub:
             self.store.used = False
             return True
 
-    def consume_failure_injection(self, event_id: str) -> bool:
+    def consume_failure_injection(self, event_id: str, **telemetry) -> bool:
         with self.store.lock:
             request = self.inner.get_request("REQ-003")
             if (
@@ -91,6 +92,7 @@ class ReliabilityRepositoryStub:
             ):
                 return False
             self.store.used = True
+            self.store.telemetry = telemetry
             return True
 
     def verify_existing_effect(self, event_id: str, *, resume_generation: int, **kwargs) -> NoOpVerificationResult:
@@ -224,6 +226,16 @@ def test_request_remains_verified_after_injected_503() -> None:
     assert repository.get_request("REQ-003").state == RequestState.VERIFIED
 
 
+def test_injected_503_persists_task_attempt_telemetry() -> None:
+    repository = ReliabilityRepositoryStub()
+    apply_with_injected_lost_ack(repository)
+    assert repository.store.telemetry == {
+        "resume_generation": 2,
+        "task_name": "g2",
+        "task_attempt": "0",
+    }
+
+
 def test_retry_never_instantiates_gemini(monkeypatch) -> None:
     repository = ReliabilityRepositoryStub()
     apply_with_injected_lost_ack(repository)
@@ -304,4 +316,3 @@ def test_noop_id_is_generation_deterministic() -> None:
     apply_with_injected_lost_ack(repository)
     _, result = workflow(repository).resume(payload(), task_name="g2", task_attempt="1")
     assert result["evidence_id"] == "noop:EVT-003:g2"
-

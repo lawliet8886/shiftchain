@@ -256,7 +256,12 @@ class CloudWorkflow:
             )
             result = engine.process(payload.target_event_id, resumed_intent)
 
-        if result.state == RequestState.VERIFIED and repository.consume_failure_injection(payload.target_event_id):
+        if result.state == RequestState.VERIFIED and repository.consume_failure_injection(
+            payload.target_event_id,
+            resume_generation=payload.resume_generation,
+            task_name=task_name,
+            task_attempt=task_attempt,
+        ):
             run = repository.get_run(payload.run_id)
             shift = run.shifts[resumed_intent.shift_id] if run and resumed_intent.shift_id else None
             log_event(

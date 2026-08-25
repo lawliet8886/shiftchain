@@ -139,7 +139,7 @@ class ResumeRepository:
         self.metadata["activity"].append(entry)
         self.metadata["last_result"] = entry["result"]
 
-    def consume_failure_injection(self, event_id: str) -> bool:
+    def consume_failure_injection(self, event_id: str, **kwargs) -> bool:
         return False
 
     def verify_existing_effect(self, event_id: str, **kwargs) -> NoOpVerificationResult:
