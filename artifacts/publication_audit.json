@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "audited_at": "2026-08-25T16:03:00Z",
-  "phase": "Phase 5 final pre-push",
+  "phase": "Phase 5 final local and remote",
   "scope": [
     "tracked working tree",
     "all Git patch history",
@@ -41,5 +41,19 @@
     "the public Cloud Run URL"
   ],
   "publication_boundary": "Safe to publish tracked content to the confirmed public GitHub repository. Video upload and final Devpost submission remain prohibited.",
-  "PUBLICATION_SAFE": true
+  "remote_audit": {
+    "repository": "https://github.com/lawliet8886/shiftchain",
+    "audited_remote_head": "8347bcbdfcda6316d8dcd50e7b962cdb1ec1db0c",
+    "method": "Fresh public HTTPS clone with no reliance on the original working tree; scanned checked-out content and all cloned Git patch history.",
+    "current_secret_matches": 0,
+    "current_personal_path_matches": 0,
+    "current_real_institution_matches": 0,
+    "history_secret_matches": 0,
+    "history_personal_path_matches": 0,
+    "history_real_institution_matches": 0,
+    "tracked_dotenv": 0,
+    "tracked_development_artifacts": 0
+  },
+  "PUBLICATION_SAFE": true,
+  "REMOTE_PUBLICATION_SAFE": true
 }

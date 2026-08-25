@@ -1,0 +1,35 @@
+{
+  "verified_at": "2026-08-25T16:14:00Z",
+  "repository": "https://github.com/lawliet8886/shiftchain",
+  "visibility": "PUBLIC",
+  "anonymous_browser": {
+    "signed_out": true,
+    "repository_page": "rendered",
+    "readme": "rendered",
+    "hero_image": "rendered",
+    "reliability_image": "rendered",
+    "architecture": "accessible",
+    "source_tree": "accessible",
+    "provenance": "accessible"
+  },
+  "anonymous_http": {
+    "repository_status": 200,
+    "readme_status": 200,
+    "hero_status": 200,
+    "reliability_status": 200,
+    "architecture_status": 200,
+    "provenance_status": 200,
+    "source_status": 200
+  },
+  "clean_clone": {
+    "clone": "PASS",
+    "create_venv": "PASS",
+    "install_editable_dev": "PASS",
+    "tests": "59 passed",
+    "local_demo": "PASS",
+    "packaged_ui_import": "PASS",
+    "secret_configuration_used": false
+  },
+  "remote_history_scan": "PASS",
+  "REMOTE_PUBLICATION_SAFE": true
+}
