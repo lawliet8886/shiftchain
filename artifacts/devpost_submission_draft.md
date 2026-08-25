@@ -1,7 +1,7 @@
 # ShiftChain — Devpost submission draft
 
 **Category:** Taskmaster  
-**Video URL:** PENDING HUMAN UPLOAD
+**Video URL:** https://www.youtube.com/watch?v=-4YZzsMU9ZM
 
 ## One-liner
 
@@ -99,4 +99,4 @@ All organization, worker, shift and message data are synthetic. The MVP uses fou
 - Hosted app: https://shiftchain-demo-7skxzw642a-uc.a.run.app
 - Source: https://github.com/lawliet8886/shiftchain
 - Architecture: https://github.com/lawliet8886/shiftchain/blob/main/docs/architecture.svg
-- Video: PENDING HUMAN UPLOAD
+- Video: https://www.youtube.com/watch?v=-4YZzsMU9ZM

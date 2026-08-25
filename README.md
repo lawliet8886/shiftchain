@@ -11,6 +11,8 @@ Noah ──waiting───▶ Emma  →  verified  →  retry-safe
 
 [Live Google Cloud demo](https://shiftchain-demo-7skxzw642a-uc.a.run.app) · Gemini 3.7 Flash · Google ADK · Cloud Run · Firestore · Cloud Tasks
 
+🎬 [Final hackathon demo](https://www.youtube.com/watch?v=-4YZzsMU9ZM)
+
 ![ShiftChain responsibility journey](docs/images/shiftchain-hero.png)
 
 ## The friction
@@ -204,6 +206,6 @@ This hackathon MVP deliberately uses one synthetic organization, four frozen dem
 - English judge UI, real hosted application, architecture diagram and reproducible setup.
 - Real cloud execution and controlled reliability evidence; offline fixtures are not substituted in cloud rehearsals.
 - Synthetic data and local project provenance are disclosed.
-- Public release-candidate repository prepared; no bonus-model integration, video upload or final Devpost submission has been performed.
+- Final demo published; no bonus-model integration or final Devpost submission has been performed.
 
 See [docs/JUDGING_MAP.md](docs/JUDGING_MAP.md), [PROJECT_PROVENANCE.md](PROJECT_PROVENANCE.md) and the phase gate artifacts for evidence.
