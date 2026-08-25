@@ -4,15 +4,23 @@
 
 ShiftChain turns messy operational handoff messages into safe, deterministic and auditable custody changes. Gemini 3.7 Flash is restricted to structured intent extraction. The domain engine owns validation, authorization, idempotency, concurrency checks, mutation and verification.
 
-## Phase 2 status
+## Phase 3 status
 
-The cloud vertical slice is deployed in the dedicated Google Cloud project `gen-lang-client-0643751280`. Firestore, Cloud Run, Cloud Tasks, Secret Manager and app-level OIDC validation are live. The autonomous resume is latency-independent: an early g1 wake safely records an unmet condition, and a later verified confirmation advances the generation and creates an immediate authenticated g2 wake. The recovery run finished Noah → Emma exactly once. Phase 2 passed after approving `/health` as the canonical Cloud Run-safe health endpoint; the original `/healthz` 404 remains preserved in the gate evidence. See `artifacts/PHASE2_GATE.md`. Phase 3 has not started.
+The cloud vertical slice is deployed in the dedicated Google Cloud project `gen-lang-client-0643751280`. Firestore, Cloud Run, Cloud Tasks, Secret Manager and app-level OIDC validation are live. Phase 3 proves that a real Cloud Tasks retry after an intentionally lost acknowledgement preserves exactly one Noah → Emma business mutation. See `artifacts/PHASE3_GATE.md` and `artifacts/reliability_proof.json`.
+
+## Reliability
+
+Cloud Tasks is at-least-once infrastructure; ShiftChain does not claim or assume exactly-once delivery. Deterministic request and ledger idempotency keys protect mutations, while `APPLIED` and `VERIFIED` remain separate business states. Every retry reads persistent truth before considering another mutation.
+
+When a request is already `VERIFIED`, ShiftChain validates the applied transfer, independent verification, versions, custody predecessor and head, owner, idempotency keys and record uniqueness. Valid evidence produces deterministic, non-custody `NO_OP_VERIFIED`; inconsistent evidence fails closed and is never reapplied.
+
+The explicit DEMO-only `LOST_ACK_AFTER_VERIFY_ONCE` injection transactionally consumes one persisted fault only after commit and independent verification. Judge Mode then returns HTTP 503. The same real Cloud Task retries, discovers the verified effect, records `NO_OP_VERIFIED`, and returns 204 without changing owner, versions or custody.
 
 ## Phase 1 foundation
 
 Implemented here: frozen HCO dataset, Pydantic intent schema, in-memory repository abstraction, deterministic reconciliation engine, append-only custody ledger, independent read-back verification, one ADK agent (`shiftchain_agent`), Gemini feasibility check, tests, and a local CLI demo.
 
-The Phase 2 adapter adds a named Firestore database, one Cloud Run service, one Cloud Tasks queue, a dedicated runtime identity, a dedicated task-caller identity and Secret Manager delivery. No remote GitHub, custom Dockerfile, CI/CD, failure injection or Phase 3 work is included.
+The cloud adapter uses one named Firestore database, one Cloud Run service, one Cloud Tasks queue, a dedicated runtime identity, a dedicated task-caller identity and Secret Manager delivery. Phase 3 adds only the controlled reliability injection and evidence path. No remote GitHub, custom Dockerfile, CI/CD or additional cloud service is included.
 
 ## Run locally
 

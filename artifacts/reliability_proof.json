@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "observed_at": "2026-08-25T14:34:00Z",
+  "phase": "PHASE_3_RELIABILITY_LOST_ACKNOWLEDGEMENT",
+  "gate": "PASS",
+  "project": {
+    "project_id": "gen-lang-client-0643751280",
+    "region": "us-central1",
+    "other_projects_used": false
+  },
+  "resources": {
+    "firestore_database": "shiftchain",
+    "cloud_run_service": "shiftchain-demo",
+    "cloud_run_revision": "shiftchain-demo-00007-k8n",
+    "cloud_run_traffic_percent": 100,
+    "cloud_run_min_instances": 0,
+    "cloud_run_max_instances": 2,
+    "cloud_tasks_queue": "shiftchain-resume",
+    "queue_state": "RUNNING",
+    "queue_final_depth": 0,
+    "new_resources_created": false
+  },
+  "queue_retry_config": {
+    "changed_for_phase_3": false,
+    "max_attempts": 5,
+    "min_backoff_seconds": 5,
+    "max_backoff_seconds": 60,
+    "max_doublings": 3,
+    "max_retry_duration_seconds": 300,
+    "max_concurrent_dispatches": 2,
+    "max_dispatches_per_second": 2.0
+  },
+  "injected_run": {
+    "run_id": "P3RELIABILITY-FINAL-20260825",
+    "request_id": "REQ-003",
+    "target_event_id": "EVT-003",
+    "shift_id": "SHF-260827-M",
+    "generation": 2,
+    "task_name": "projects/gen-lang-client-0643751280/locations/us-central1/queues/shiftchain-resume/tasks/resume-4167da92a26ec96ffe4cbd97391e5668",
+    "fault_injection": {
+      "name": "LOST_ACK_AFTER_VERIFY_ONCE",
+      "mode": "DEMO",
+      "opt_in": true,
+      "configured_at": "2026-08-25T14:30:25.102359Z",
+      "persisted": true,
+      "consumed_once": true,
+      "consumed_at": "2026-08-25T14:31:19.527859Z",
+      "used": true,
+      "http_status": 503
+    },
+    "before_first_g2": {
+      "owner_id": "W-004",
+      "owner_name": "Noah Patel",
+      "request_status": "WAITING_CONFIRMATION",
+      "shift_version": 0,
+      "schedule_version": 0,
+      "custody_head_event_id": "ledger:initial:SHF-260827-M"
+    },
+    "attempts": [
+      {
+        "application_delivery": 1,
+        "task_retry_count_header": "0",
+        "dispatch_timestamp": "2026-08-25T14:31:18.285499Z",
+        "apply_timestamp": "2026-08-25T14:31:18.786562Z",
+        "verify_timestamp": "2026-08-25T14:31:19.253198Z",
+        "fault_consumed_timestamp": "2026-08-25T14:31:19.527859Z",
+        "http_outcome": 503,
+        "business_status_after_response": "VERIFIED",
+        "owner_after_response": "W-005",
+        "shift_version_before": 0,
+        "shift_version_after": 1,
+        "schedule_version_before": 0,
+        "schedule_version_after": 1,
+        "result": "HTTP_ACKNOWLEDGEMENT_INTENTIONALLY_FAILED"
+      },
+      {
+        "application_delivery": 2,
+        "task_retry_count_header": "2",
+        "dispatch_timestamp": "2026-08-25T14:31:35.304185Z",
+        "readback_timestamp": "2026-08-25T14:31:35.409364Z",
+        "http_outcome": 204,
+        "business_status_after_response": "VERIFIED",
+        "owner_after_response": "W-005",
+        "shift_version_before": 1,
+        "shift_version_after": 1,
+        "schedule_version_before": 1,
+        "schedule_version_after": 1,
+        "result": "NO_OP_VERIFIED"
+      }
+    ],
+    "platform_retry_count_note": "The two application-visible deliveries were 503 then 204. Cloud Tasks reported retry-count 0 then 2; no intermediate request reached the Cloud Run request log.",
+    "same_task": true,
+    "same_generation": true,
+    "manual_request_between_503_and_204": false,
+    "gemini_called_on_retry": false,
+    "final_business_status": "VERIFIED",
+    "final_owner_id": "W-005",
+    "final_owner_name": "Emma Wilson",
+    "final_shift_version": 1,
+    "final_schedule_version": 1,
+    "final_custody_head_event_id": "ledger:REQ-003:v1",
+    "custody_result": [
+      "W-004",
+      "W-005"
+    ],
+    "transfer_applied_count": 1,
+    "transfer_verified_count": 1,
+    "custody_edge_count": 1,
+    "noop_verified_count": 1,
+    "no_op_verified_evidence_id": "noop:EVT-003:g2",
+    "idempotency_keys": {
+      "request": "request:P3RELIABILITY-FINAL-20260825:REQ-003",
+      "transfer": "ledger:P3RELIABILITY-FINAL-20260825:REQ-003",
+      "verification": "verify:P3RELIABILITY-FINAL-20260825:REQ-003",
+      "no_op": "noop:P3RELIABILITY-FINAL-20260825:EVT-003:g2"
+    }
+  },
+  "normal_run": {
+    "run_id": "P3RELIABILITY-B-20260825",
+    "fault_injection": null,
+    "failure_injection_used": false,
+    "g2_task_name": "projects/gen-lang-client-0643751280/locations/us-central1/queues/shiftchain-resume/tasks/resume-aeb4068cc7efe9bf6ad2b1ec0d0ea525",
+    "g2_http_outcome": 200,
+    "g2_dispatch_timestamp": "2026-08-25T14:21:02.322737Z",
+    "applied_timestamp": "2026-08-25T14:21:02.681069Z",
+    "verified_timestamp": "2026-08-25T14:21:02.852829Z",
+    "final_business_status": "VERIFIED",
+    "final_owner_id": "W-005",
+    "final_shift_version": 1,
+    "final_schedule_version": 1,
+    "no_op_verified_evidence": false
+  },
+  "security_regression": {
+    "revision": "shiftchain-demo-00007-k8n",
+    "valid_oidc_task_caller": 204,
+    "anonymous": 401,
+    "wrong_audience": 401,
+    "wrong_identity": 403,
+    "failed_test_tasks_deleted": true,
+    "queue_empty_after_test": true
+  },
+  "health": {
+    "endpoint": "/health",
+    "http_status": 200,
+    "response_status": "ok",
+    "queue_depth_before": 0,
+    "queue_depth_after": 0,
+    "firestore_reference_update_time_before": "2026-08-25T14:31:19.672706Z",
+    "firestore_reference_update_time_after": "2026-08-25T14:31:19.672706Z",
+    "gemini_calls": 0,
+    "firestore_writes": 0,
+    "cloud_tasks_created": 0
+  },
+  "tests": {
+    "passed": 58,
+    "failed": 0,
+    "coverage_percent": 55,
+    "compileall": "PASS",
+    "pip_check": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "secret_scan": "PASS",
+  "freeze_deviation": "RELIABILITY IMPLEMENTATION ONLY",
+  "phase_4_activity": "NONE"
+}

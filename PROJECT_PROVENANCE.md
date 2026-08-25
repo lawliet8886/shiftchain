@@ -3,7 +3,7 @@
 - Project: ShiftChain
 - Organization: Harborlight Community Operations (HCO)
 - Frozen tagline: “Responsibility moves. ShiftChain keeps the truth.”
-- Phase: Phase 2 passed — autonomous cloud resume proven; Phase 3 not started
+- Phase: Phase 3 passed — exactly-once business effect proven under at-least-once delivery
 - Created locally: 2026-08-25, America/Sao_Paulo
 - Source specification: user-provided Phase 0 freeze and Phase 1 build brief in the Codex task
 - Authorized cloud project: `gen-lang-client-0643751280` (`concurso`); no other accessible project was used
@@ -14,7 +14,13 @@
   - ADK sessions and Runner: https://adk.dev/sessions/memory/
   - Firestore databases: https://cloud.google.com/firestore/docs/manage-databases
   - Cloud Tasks HTTP targets and OIDC: https://cloud.google.com/tasks/docs/creating-http-target-tasks
+  - Cloud Tasks queue retry configuration: https://cloud.google.com/tasks/docs/configure-retry-task
+  - Cloud Tasks Queue REST resource: https://cloud.google.com/tasks/docs/reference/rest/v2/projects.locations.queues
+  - Cloud Tasks Task REST resource: https://cloud.google.com/tasks/docs/reference/rest/v2/projects.locations.queues.tasks
   - Cloud Run service-to-service authentication: https://cloud.google.com/run/docs/authenticating/service-to-service
   - Cloud Run known reserved URL paths: https://cloud.google.com/run/docs/known-issues
-- Scope boundary: one named Firestore database, one Cloud Run service and one Cloud Tasks queue; no remote repository, custom Dockerfile, CI/CD, failure injection or Phase 3.
+- Phase 3 implementation: explicit DEMO-only, Firestore-persisted, transactional one-shot lost-acknowledgement injection plus deterministic read-before-repeat and non-custody `NO_OP_VERIFIED` evidence.
+- Cloud services unchanged: one named Firestore database, one Cloud Run service and one Cloud Tasks queue; no new Google Cloud service or external observability stack.
+- Code provenance: Phase 3 reliability code was authored locally for ShiftChain; no external application code was reused.
+- Scope boundary: no remote repository, custom Dockerfile, CI/CD or Phase 4 activity.
 - Data policy: the demo organization, workers, shifts, and messages are synthetic.
