@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-08-25T10:21:52.352559+00:00",
+  "model": "gemini-3.7-flash",
+  "sdk": "google-genai",
+  "sdk_version": "2.19.0",
+  "adk_version": "2.7.1",
+  "route": null,
+  "credential_values_logged": false,
+  "fixtures": {},
+  "adk": null,
+  "status": "BLOCKED",
+  "access_probe": {
+    "attempted": true,
+    "route": "Gemini Developer API via existing ADC OAuth",
+    "success": false,
+    "error": "ValueError: No API key was provided. Please pass a valid API key. Learn how to create an API key at https://ai.google.dev/gemini-api/docs/api-key.",
+    "latency_ms": 2619
+  },
+  "error": "No Gemini API key or configured Vertex AI project was found; the existing ADC OAuth probe was also unable to authenticate a model call."
+}
