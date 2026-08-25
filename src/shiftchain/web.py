@@ -37,9 +37,16 @@ def get_oidc_validator() -> OIDCValidator:
     return OIDCValidator(audience=config.task_audience, expected_email=config.task_caller_email)
 
 
+@app.get("/health", include_in_schema=True)
+@app.get("/healthz/", include_in_schema=False)
 @app.get("/healthz")
 def healthz() -> dict:
-    """Process-only health check: no Gemini, Firestore or Tasks call."""
+    """Process-only health check: no Gemini, Firestore or Tasks call.
+
+    Cloud Run reserves some paths ending in ``z`` at the Google Frontend, so
+    ``/health`` is the deployable canonical endpoint while the frozen
+    ``/healthz`` contract remains available locally and in OpenAPI.
+    """
     return {
         "status": "ok",
         "service": "shiftchain-demo",
@@ -118,4 +125,3 @@ def resume_task(
     if status_code == 204:
         return Response(status_code=204)
     return JSONResponse(status_code=status_code, content=jsonable_encoder(result))
-

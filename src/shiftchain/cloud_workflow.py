@@ -94,15 +94,43 @@ class CloudWorkflow:
             }
 
         if event_id == "EVT-004" and stored_request.state == RequestState.VERIFIED:
-            intent = runtime.parsed.get(event_id)
+            intent = runtime.parsed.get(event_id) or stored_request.intent
             if intent is None or not intent.target_request_id or not intent.confirmation_by_worker_id:
                 raise RuntimeError("confirmation intent missing after ADK execution")
-            repository.record_confirmation(
-                confirmation_event_id=event_id,
-                target_request_id=intent.target_request_id,
-                confirmer_worker_id=intent.confirmation_by_worker_id,
-                evidence=[item.model_dump(mode="json") for item in intent.evidence],
-            )
+            target_request = repository.get_request(intent.target_request_id)
+            if target_request is None:
+                raise RuntimeError("confirmation target request missing")
+            target_metadata = repository.event_metadata(target_request.source_event_id) or {}
+            if target_metadata.get("workflow_status") == RequestState.VERIFIED.value:
+                response["confirmation_schedule_result"] = "TARGET_ALREADY_VERIFIED"
+            elif target_metadata.get("confirmation_evidence"):
+                response["confirmation_schedule_result"] = "CONFIRMATION_ALREADY_RECORDED"
+            else:
+                current_generation = int(target_metadata.get("resume_generation", 0))
+                next_generation = current_generation + 1
+                payload = ResumePayload(
+                    run_id=run_id,
+                    target_event_id=target_request.source_event_id,
+                    resume_generation=next_generation,
+                )
+                scheduled = self.scheduler.create(payload, delay_seconds=0)
+                schedule_result = repository.record_confirmation_and_schedule(
+                    confirmation_event_id=event_id,
+                    target_request_id=intent.target_request_id,
+                    confirmer_worker_id=intent.confirmation_by_worker_id,
+                    evidence=[item.model_dump(mode="json") for item in intent.evidence],
+                    expected_generation=current_generation,
+                    resume_generation=next_generation,
+                    task_name=scheduled.name,
+                    schedule_at=scheduled.schedule_at,
+                )
+                response["confirmation_task"] = {
+                    "name": scheduled.name,
+                    "schedule_at": scheduled.schedule_at,
+                    "resume_generation": next_generation,
+                    "already_exists": scheduled.already_exists,
+                }
+                response["confirmation_schedule_result"] = schedule_result
             response["confirmation_recorded_for"] = intent.target_request_id
 
         latency_ms = round((datetime.now(timezone.utc) - started).total_seconds() * 1000)
@@ -140,13 +168,34 @@ class CloudWorkflow:
             raise KeyError("target event not found")
         persisted_generation = int(metadata.get("resume_generation", 0))
         if payload.resume_generation < persisted_generation:
+            repository.record_resume_activity(
+                payload.target_event_id,
+                result="STALE_GENERATION_NO_OP",
+                resume_generation=payload.resume_generation,
+                task_name=task_name,
+                task_attempt=task_attempt,
+            )
             return 204, {"result": "STALE_GENERATION_NO_OP"}
         if payload.resume_generation > persisted_generation:
             raise FutureGenerationError("task generation is newer than persisted state")
         if metadata.get("workflow_status") == RequestState.VERIFIED.value:
+            repository.record_resume_activity(
+                payload.target_event_id,
+                result="ALREADY_VERIFIED_NO_OP",
+                resume_generation=payload.resume_generation,
+                task_name=task_name,
+                task_attempt=task_attempt,
+            )
             return 204, {"result": "ALREADY_VERIFIED_NO_OP"}
         confirmation = metadata.get("confirmation_evidence")
         if not confirmation:
+            repository.record_resume_activity(
+                payload.target_event_id,
+                result="WAIT_CONDITION_NOT_MET",
+                resume_generation=payload.resume_generation,
+                task_name=task_name,
+                task_attempt=task_attempt,
+            )
             return 204, {"result": "STILL_WAITING_CONFIRMATION"}
 
         request_id = metadata["request_id"]
@@ -189,4 +238,3 @@ class CloudWorkflow:
 
     def snapshot(self, run_id: str) -> dict[str, Any] | None:
         return self.repository(run_id).snapshot()
-

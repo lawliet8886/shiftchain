@@ -518,13 +518,23 @@ class FirestoreRepository(ShiftChainRepository):
 
         return self._transaction_runner(callback)
 
-    def record_confirmation(
+    def record_confirmation_and_schedule(
         self,
         confirmation_event_id: str,
         target_request_id: str,
         confirmer_worker_id: str,
         evidence: list[dict[str, Any]],
-    ) -> None:
+        *,
+        expected_generation: int,
+        resume_generation: int,
+        task_name: str,
+        schedule_at: datetime,
+    ) -> str:
+        """Atomically persist confirmation evidence and its new resume generation.
+
+        The Cloud Task is intentionally created before this transaction. A task
+        that wins the race sees a future generation and retries without mutation.
+        """
         confirmation_ref = self._event_ref(confirmation_event_id)
         target = self.get_request(target_request_id)
         if target is None:
@@ -532,7 +542,7 @@ class FirestoreRepository(ShiftChainRepository):
         target_ref = self._event_ref(target.source_event_id)
         recorded_at = _utcnow()
 
-        def callback(transaction) -> None:
+        def callback(transaction) -> str:
             confirmation_snapshot = confirmation_ref.get(transaction=transaction)
             target_snapshot = target_ref.get(transaction=transaction)
             if not confirmation_snapshot.exists or not target_snapshot.exists:
@@ -541,8 +551,26 @@ class FirestoreRepository(ShiftChainRepository):
             target_doc = target_snapshot.to_dict()
             if confirmation_doc.get("workflow_status") != RequestState.VERIFIED.value:
                 raise RuntimeError("confirmation event is not verified")
+            if target_doc.get("workflow_status") == RequestState.VERIFIED.value:
+                return "TARGET_ALREADY_VERIFIED"
             if target_doc.get("workflow_status") != RequestState.WAITING_CONFIRMATION.value:
                 raise RuntimeError("target request is not waiting")
+            current_generation = int(target_doc.get("resume_generation", 0))
+            existing_confirmation = target_doc.get("confirmation_evidence")
+            if existing_confirmation:
+                return "CONFIRMATION_ALREADY_RECORDED"
+            if current_generation != expected_generation:
+                return "GENERATION_CONFLICT"
+            activity = list(target_doc.get("activity") or [])
+            activity.append(
+                {
+                    "result": "CONFIRMATION_RECORDED_RESUME_SCHEDULED",
+                    "source_event_id": confirmation_event_id,
+                    "resume_generation": resume_generation,
+                    "task_name": task_name,
+                    "occurred_at": recorded_at,
+                }
+            )
             transaction.update(
                 target_ref,
                 {
@@ -553,11 +581,71 @@ class FirestoreRepository(ShiftChainRepository):
                         "evidence": evidence,
                         "recorded_at": recorded_at,
                     },
-                    "last_result": "CONFIRMATION_RECORDED",
+                    "resume_generation": resume_generation,
+                    "scheduled_task_name": task_name,
+                    "next_attempt_at": schedule_at,
+                    "activity": activity,
+                    "last_result": "CONFIRMATION_RECORDED_RESUME_SCHEDULED",
                     "updated_at": recorded_at,
                 },
             )
-            transaction.update(confirmation_ref, {"last_result": "CONFIRMATION_RECORDED", "updated_at": recorded_at})
+            transaction.update(
+                confirmation_ref,
+                {
+                    "last_result": "CONFIRMATION_RECORDED_RESUME_SCHEDULED",
+                    "target_event_id": target.source_event_id,
+                    "scheduled_task_name": task_name,
+                    "resume_generation": resume_generation,
+                    "updated_at": recorded_at,
+                },
+            )
+            return "CONFIRMATION_RECORDED_RESUME_SCHEDULED"
+
+        return self._transaction_runner(callback)
+
+    def record_resume_activity(
+        self,
+        event_id: str,
+        *,
+        result: str,
+        resume_generation: int,
+        task_name: str | None,
+        task_attempt: str | None,
+    ) -> None:
+        event_ref = self._event_ref(event_id)
+        recorded_at = _utcnow()
+
+        def callback(transaction) -> None:
+            snapshot = event_ref.get(transaction=transaction)
+            if not snapshot.exists:
+                raise RuntimeError("resume event missing")
+            raw = snapshot.to_dict()
+            activity = list(raw.get("activity") or [])
+            duplicate = any(
+                item.get("result") == result
+                and int(item.get("resume_generation", -1)) == resume_generation
+                and item.get("task_name") == task_name
+                for item in activity
+            )
+            if not duplicate:
+                activity.append(
+                    {
+                        "result": result,
+                        "resume_generation": resume_generation,
+                        "task_name": task_name,
+                        "task_attempt": task_attempt,
+                        "occurred_at": recorded_at,
+                    }
+                )
+            transaction.update(
+                event_ref,
+                {
+                    "activity": activity,
+                    "last_attempt": recorded_at,
+                    "last_result": result,
+                    "updated_at": recorded_at,
+                },
+            )
 
         self._transaction_runner(callback)
 
@@ -570,4 +658,3 @@ class FirestoreRepository(ShiftChainRepository):
         events.sort(key=lambda item: item["event_id"])
         ledger.sort(key=lambda item: (item.get("occurred_at") or datetime.min.replace(tzinfo=timezone.utc), item["ledger_event_id"]))
         return {"run": run_snapshot.to_dict(), "events": events, "ledger": ledger}
-
