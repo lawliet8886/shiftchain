@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "observed_at": "2026-08-25T13:22:00Z",
+  "phase": "PHASE_2",
+  "gate": "BLOCKED",
+  "project": {
+    "project_id": "gen-lang-client-0643751280",
+    "name": "concurso",
+    "lifecycle": "ACTIVE",
+    "billing_enabled": true,
+    "other_projects_used": false
+  },
+  "resources": {
+    "region": "us-central1",
+    "firestore_database": "shiftchain",
+    "cloud_run_service": "shiftchain-demo",
+    "cloud_tasks_queue": "shiftchain-resume",
+    "runtime_service_account": "shiftchain-runtime",
+    "task_caller_service_account": "shiftchain-task-caller",
+    "secret": "shiftchain-gemini-api-key",
+    "cloud_run_min_instances": 0,
+    "cloud_run_max_instances": 2,
+    "demo_delay_seconds": 15
+  },
+  "slice_a": {
+    "run_id": "P2TEST-SLICE-A-20260825",
+    "event": "EVT-001",
+    "state": "VERIFIED",
+    "owner": "W-002",
+    "shift_version": 1,
+    "schedule_version": 1,
+    "custody": ["W-001", "W-002"],
+    "cloud_run_latency_seconds": 12.50822323
+  },
+  "oidc": {
+    "valid_task_caller": 204,
+    "anonymous": 401,
+    "wrong_audience": 401,
+    "wrong_identity": 403
+  },
+  "slice_b": {
+    "state": "BLOCKED",
+    "attempts": [
+      {
+        "run_id": "P2TEST-SLICE-B2-20260825",
+        "evt004_dispatch_after_evt003_seconds": 0.949453,
+        "evt004_cloud_run_latency_seconds": 27.720509049,
+        "wake_preceded_confirmation": true
+      },
+      {
+        "run_id": "P2TEST-SLICE-B3-20260825",
+        "evt004_dispatch_after_evt003_seconds": 0.410091,
+        "evt004_cloud_run_latency_seconds": 16.051062237,
+        "wake_preceded_confirmation": true
+      }
+    ],
+    "final_owner": "W-004",
+    "shift_version": 0,
+    "schedule_version": 0,
+    "confirmation_evidence_present": true,
+    "transfer_applied": false,
+    "verified": false,
+    "fail_closed": true
+  },
+  "phase_3_started": false
+}
