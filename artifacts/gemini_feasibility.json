@@ -1,20 +1,353 @@
 {
-  "checked_at": "2026-08-25T10:23:06.753396+00:00",
+  "checked_at": "2026-08-25T12:25:22.641426+00:00",
   "model": "gemini-3.7-flash",
+  "contract_id": "gemini-3.7-flash:structured-intent-1.0:prompt-2026-08-25",
   "sdk": "google-genai",
   "sdk_version": "2.19.0",
   "adk_version": "2.7.1",
-  "route": null,
+  "route": "Gemini Developer API",
   "credential_values_logged": false,
-  "fixtures": {},
-  "adk": null,
-  "status": "BLOCKED",
-  "access_probe": {
-    "attempted": true,
-    "route": "Gemini Developer API via existing ADC OAuth",
-    "success": false,
-    "error": "ValueError: No API key was provided. Please pass a valid API key. Learn how to create an API key at https://ai.google.dev/gemini-api/docs/api-key.",
-    "latency_ms": 2720
+  "fixtures": {
+    "EVT-001": {
+      "passed": true,
+      "mismatches": {},
+      "ambiguities": [],
+      "latency_ms": 3004,
+      "evaluated_at": "2026-08-25T12:22:26.718023+00:00",
+      "parsed": {
+        "schema_version": "1.0.0",
+        "source_event_id": "EVT-001",
+        "intent_type": "TRANSFER_SHIFT",
+        "from_worker_id": "W-001",
+        "to_worker_id": "W-002",
+        "shift_id": "SHF-260826-E",
+        "target_request_id": null,
+        "dependency_request_id": null,
+        "confirmation": "PRESENT",
+        "confirmation_by_worker_id": "W-002",
+        "decision": "NOT_APPLICABLE",
+        "language": "en",
+        "ambiguities": [],
+        "evidence": [
+          {
+            "field": "from_worker_id",
+            "quote": "Maya Brooks’s"
+          },
+          {
+            "field": "to_worker_id",
+            "quote": "Liam Chen will take"
+          },
+          {
+            "field": "shift_id",
+            "quote": "Harbor Hub Close shift on Wednesday, Aug 26, 18:00–22:00"
+          },
+          {
+            "field": "confirmation",
+            "quote": "We both approve. — Maya & Liam"
+          }
+        ],
+        "confidence": 0.98
+      },
+      "model_id": "gemini-3.7-flash",
+      "route": "Gemini Developer API",
+      "attempt": 1,
+      "result": "PASS",
+      "error_type": null
+    },
+    "EVT-003": {
+      "passed": true,
+      "mismatches": {},
+      "ambiguities": [],
+      "latency_ms": 3444,
+      "evaluated_at": "2026-08-25T12:22:34.057583+00:00",
+      "parsed": {
+        "schema_version": "1.0.0",
+        "source_event_id": "EVT-003",
+        "intent_type": "TRANSFER_SHIFT",
+        "from_worker_id": "W-004",
+        "to_worker_id": "W-005",
+        "shift_id": "SHF-260827-M",
+        "target_request_id": null,
+        "dependency_request_id": null,
+        "confirmation": "ABSENT",
+        "confirmation_by_worker_id": null,
+        "decision": "NOT_APPLICABLE",
+        "language": "en",
+        "ambiguities": [],
+        "evidence": [
+          {
+            "field": "intent_type",
+            "quote": "Please transfer"
+          },
+          {
+            "field": "from_worker_id",
+            "quote": "Noah"
+          },
+          {
+            "field": "to_worker_id",
+            "quote": "Emma Wilson"
+          },
+          {
+            "field": "shift_id",
+            "quote": "Supply Point Open shift on Thursday, Aug 27, 08:00–12:00"
+          },
+          {
+            "field": "confirmation",
+            "quote": "Emma has not confirmed yet"
+          }
+        ],
+        "confidence": 1.0
+      },
+      "model_id": "gemini-3.7-flash",
+      "route": "Gemini Developer API",
+      "attempt": 1,
+      "result": "PASS",
+      "error_type": null
+    },
+    "AMB-001": {
+      "passed": true,
+      "mismatches": {},
+      "ambiguities": [
+        "Sender identity ('my shift') is not specified in candidates",
+        "Recipient 'L.' is ambiguous between Liam Chen (W-002) and Lucas Martin (W-006)",
+        "Shift on Wednesday is ambiguous among Wednesday shift candidates"
+      ],
+      "latency_ms": 5650,
+      "evaluated_at": "2026-08-25T12:22:42.825982+00:00",
+      "parsed": {
+        "schema_version": "1.0.0",
+        "source_event_id": "AMB-001",
+        "intent_type": "UNKNOWN",
+        "from_worker_id": null,
+        "to_worker_id": null,
+        "shift_id": null,
+        "target_request_id": null,
+        "dependency_request_id": null,
+        "confirmation": "ABSENT",
+        "confirmation_by_worker_id": null,
+        "decision": "NOT_APPLICABLE",
+        "language": "en",
+        "ambiguities": [
+          "Sender identity ('my shift') is not specified in candidates",
+          "Recipient 'L.' is ambiguous between Liam Chen (W-002) and Lucas Martin (W-006)",
+          "Shift on Wednesday is ambiguous among Wednesday shift candidates"
+        ],
+        "evidence": [
+          {
+            "field": "to_worker_id",
+            "quote": "L."
+          },
+          {
+            "field": "shift_id",
+            "quote": "my shift on Wednesday"
+          }
+        ],
+        "confidence": 0.3
+      },
+      "model_id": "gemini-3.7-flash",
+      "route": "Gemini Developer API",
+      "attempt": 1,
+      "result": "PASS",
+      "error_type": null
+    },
+    "EVT-002": {
+      "passed": true,
+      "mismatches": {},
+      "ambiguities": [],
+      "model_id": "gemini-3.7-flash",
+      "route": "Gemini Developer API",
+      "attempt": 1,
+      "result": "PASS",
+      "latency_ms": 3994,
+      "evaluated_at": "2026-08-25T12:24:25.698774+00:00",
+      "error_type": null,
+      "parsed": {
+        "schema_version": "1.0",
+        "source_event_id": "EVT-002",
+        "intent_type": "TRANSFER_SHIFT",
+        "from_worker_id": "W-002",
+        "to_worker_id": "W-003",
+        "shift_id": "SHF-260826-E",
+        "target_request_id": null,
+        "dependency_request_id": "REQ-001",
+        "confirmation": "PRESENT",
+        "confirmation_by_worker_id": "W-003",
+        "decision": "NOT_APPLICABLE",
+        "language": "en",
+        "ambiguities": [],
+        "evidence": [
+          {
+            "field": "from_worker_id",
+            "quote": "shift I received from Maya. We both approve. — Liam"
+          },
+          {
+            "field": "to_worker_id",
+            "quote": "Sofia Reyes will take"
+          },
+          {
+            "field": "shift_id",
+            "quote": "Wednesday Harbor Hub Close shift"
+          },
+          {
+            "field": "dependency_request_id",
+            "quote": "shift I received from Maya"
+          },
+          {
+            "field": "confirmation",
+            "quote": "We both approve. — Liam & Sofia"
+          }
+        ],
+        "confidence": 0.98
+      },
+      "repeat_check": {
+        "passed": true,
+        "mismatches": {},
+        "ambiguities": [],
+        "model_id": "gemini-3.7-flash",
+        "route": "Gemini Developer API",
+        "attempt": 1,
+        "result": "PASS",
+        "latency_ms": 11944,
+        "evaluated_at": "2026-08-25T12:24:39.451248+00:00",
+        "error_type": null,
+        "parsed": {
+          "schema_version": "1.0",
+          "source_event_id": "EVT-002",
+          "intent_type": "TRANSFER_SHIFT",
+          "from_worker_id": "W-002",
+          "to_worker_id": "W-003",
+          "shift_id": "SHF-260826-E",
+          "target_request_id": null,
+          "dependency_request_id": "REQ-001",
+          "confirmation": "PRESENT",
+          "confirmation_by_worker_id": "W-003",
+          "decision": "NOT_APPLICABLE",
+          "language": "en",
+          "ambiguities": [],
+          "evidence": [
+            {
+              "field": "from_worker_id",
+              "quote": "shift I received from Maya. We both approve. — Liam"
+            },
+            {
+              "field": "to_worker_id",
+              "quote": "Sofia Reyes will take"
+            },
+            {
+              "field": "shift_id",
+              "quote": "Wednesday Harbor Hub Close shift"
+            },
+            {
+              "field": "dependency_request_id",
+              "quote": "shift I received from Maya"
+            },
+            {
+              "field": "confirmation",
+              "quote": "We both approve. — Liam & Sofia"
+            }
+          ],
+          "confidence": 0.98
+        }
+      }
+    },
+    "EVT-004": {
+      "passed": true,
+      "mismatches": {},
+      "ambiguities": [],
+      "model_id": "gemini-3.7-flash",
+      "route": "Gemini Developer API",
+      "attempt": 1,
+      "result": "PASS",
+      "latency_ms": 1793,
+      "evaluated_at": "2026-08-25T12:24:27.497367+00:00",
+      "error_type": null,
+      "parsed": {
+        "schema_version": "1.0.0",
+        "source_event_id": "EVT-004",
+        "intent_type": "CONFIRM_REQUEST",
+        "from_worker_id": null,
+        "to_worker_id": null,
+        "shift_id": "SHF-260827-M",
+        "target_request_id": "REQ-003",
+        "dependency_request_id": null,
+        "confirmation": "PRESENT",
+        "confirmation_by_worker_id": "W-005",
+        "decision": "ACCEPT",
+        "language": "en",
+        "ambiguities": [],
+        "evidence": [
+          {
+            "field": "target_request_id",
+            "quote": "confirm request REQ-003"
+          },
+          {
+            "field": "decision",
+            "quote": "accept"
+          },
+          {
+            "field": "shift_id",
+            "quote": "Noah Patel’s Supply Point Open shift on Thursday, Aug 27, 08:00–12:00"
+          },
+          {
+            "field": "confirmation_by_worker_id",
+            "quote": "Emma"
+          }
+        ],
+        "confidence": 0.98
+      }
+    }
   },
-  "error": "No Gemini API key or configured Vertex AI project was found; the existing ADC OAuth probe was also unable to authenticate a model call."
+  "adk": {
+    "agent_name": "shiftchain_agent",
+    "tool_calls": [
+      "read_event_context",
+      "validate_intent",
+      "apply_decision",
+      "verify_outcome"
+    ],
+    "final_state": "VERIFIED",
+    "final_text": "```json\n{\n  \"event_id\": \"EVT-001\",\n  \"request_id\": \"REQ-001\",\n  \"ledger_id\": \"ledger:REQ-001:v1\",\n  \"verification_id\": \"verify:REQ-001\",\n  \"state\": \"VERIFIED\",\n  \"custody\": [\n    \"W-001\",\n    \"W-002\"\n  ],\n  \"checks\": [\n    \"owner_matches\",\n    \"head_matches\",\n    \"shift_version_matches\",\n    \"schedule_version_matches\",\n    \"request_matches\",\n    \"predecessor_present\"\n  ],\n  \"verified_at\": \"2026-08-25T12:25:34.941823Z\"\n}\n```",
+    "current_owner_id": "W-002",
+    "shift_version": 1,
+    "schedule_version": 1,
+    "ledger_ids": [
+      "ledger:initial:SHF-260826-E",
+      "ledger:REQ-001:v1"
+    ],
+    "parsed_intent": {
+      "schema_version": "1.0.0",
+      "source_event_id": "EVT-001",
+      "intent_type": "TRANSFER_SHIFT",
+      "from_worker_id": "W-001",
+      "to_worker_id": "W-002",
+      "shift_id": "SHF-260826-E",
+      "target_request_id": null,
+      "dependency_request_id": null,
+      "confirmation": "PRESENT",
+      "confirmation_by_worker_id": "W-002",
+      "decision": "NOT_APPLICABLE",
+      "language": "en",
+      "ambiguities": [],
+      "evidence": [
+        {
+          "field": "from_worker_id",
+          "quote": "Maya Brooks"
+        },
+        {
+          "field": "to_worker_id",
+          "quote": "Liam Chen"
+        },
+        {
+          "field": "shift_id",
+          "quote": "Harbor Hub Close shift on Wednesday, Aug 26, 18:00–22:00"
+        },
+        {
+          "field": "confirmation",
+          "quote": "We both approve."
+        }
+      ],
+      "confidence": 0.98
+    }
+  },
+  "status": "PASS"
 }

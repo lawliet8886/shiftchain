@@ -7,11 +7,13 @@ import subprocess
 import time
 import warnings
 from dataclasses import dataclass
+from email.utils import parsedate_to_datetime
 from importlib.metadata import version
 
 from google import genai
 import google.auth
-from google.genai import types
+from google.genai import errors, types
+from dotenv import load_dotenv
 
 from shiftchain.models import CandidateContext, StructuredIntent
 
@@ -36,9 +38,11 @@ class ParseTelemetry:
     sdk_version: str
     route: str
     latency_ms: int
+    attempts: int
 
 
 def detect_route() -> GeminiRoute | None:
+    load_dotenv(override=False)
     if os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"):
         return GeminiRoute(name="Gemini Developer API")
     project = os.getenv("GOOGLE_CLOUD_PROJECT") or os.getenv("GCLOUD_PROJECT")
@@ -75,7 +79,8 @@ def detect_route() -> GeminiRoute | None:
 
 def client_for(route: GeminiRoute) -> genai.Client:
     if route.name == "Gemini Developer API":
-        return genai.Client()
+        api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+        return genai.Client(api_key=api_key, vertexai=False)
     return genai.Client(vertexai=True, project=route.project, location=route.location)
 
 
@@ -93,21 +98,35 @@ class GeminiIntentParser:
             "Do not decide whether a transfer is valid and do not invent missing facts. "
             "For ambiguous people, shifts, senders, dates, consent, or references, set intent_type "
             "to UNKNOWN or populate ambiguities. Evidence must quote only the source message. "
-            "A recipient explicitly not confirmed means confirmation ABSENT."
+            "A recipient explicitly not confirmed means confirmation ABSENT. "
+            "The decision field applies only to CONFIRM_REQUEST; for TRANSFER_SHIFT and UNKNOWN, "
+            "decision must be NOT_APPLICABLE. For CONFIRM_REQUEST, from_worker_id and to_worker_id "
+            "must both be null; identify the actor only in confirmation_by_worker_id. For "
+            "TRANSFER_SHIFT, confirmation_by_worker_id identifies the recipient: when both parties "
+            "approve it must equal to_worker_id; when the recipient has not confirmed it must be null."
         )
         started = time.perf_counter()
-        response = self.client.models.generate_content(
-            model=self.model,
-            contents=json.dumps(context.prompt_payload(), ensure_ascii=False),
-            config=types.GenerateContentConfig(
-                system_instruction=instruction,
-                response_mime_type="application/json",
-                response_schema=StructuredIntent,
-                temperature=0,
-                seed=17,
-                thinking_config=types.ThinkingConfig(thinking_level="low"),
-            ),
-        )
+        response = None
+        for attempt in range(4):
+            try:
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=json.dumps(context.prompt_payload(), ensure_ascii=False),
+                    config=types.GenerateContentConfig(
+                        system_instruction=instruction,
+                        response_mime_type="application/json",
+                        response_json_schema=StructuredIntent.model_json_schema(),
+                        temperature=0,
+                        seed=17,
+                        thinking_config=types.ThinkingConfig(thinking_level="low"),
+                    ),
+                )
+                break
+            except errors.APIError as exc:
+                if getattr(exc, "code", None) not in (429, 503) or attempt == 3:
+                    raise
+                time.sleep(self._retry_delay(exc, attempt))
+        assert response is not None
         latency_ms = round((time.perf_counter() - started) * 1000)
         parsed = response.parsed
         intent = parsed if isinstance(parsed, StructuredIntent) else StructuredIntent.model_validate_json(response.text)
@@ -118,8 +137,26 @@ class GeminiIntentParser:
             sdk_version=version("google-genai"),
             route=self.route.name,
             latency_ms=latency_ms,
+            attempts=attempt + 1,
         )
         return intent, telemetry
+
+    @staticmethod
+    def _retry_delay(exc: errors.APIError, attempt: int) -> float:
+        fallback = float(2**attempt)
+        response = getattr(exc, "response", None)
+        headers = getattr(response, "headers", None)
+        retry_after = headers.get("Retry-After") if headers else None
+        if not retry_after:
+            return fallback
+        try:
+            return max(float(retry_after), 0.0)
+        except ValueError:
+            try:
+                retry_at = parsedate_to_datetime(retry_after)
+                return max(retry_at.timestamp() - time.time(), 0.0)
+            except (TypeError, ValueError, OverflowError):
+                return fallback
 
     @staticmethod
     def enforce_candidate_boundary(intent: StructuredIntent, context: CandidateContext) -> None:

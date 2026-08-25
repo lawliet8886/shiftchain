@@ -83,6 +83,9 @@ def configure_adk_route(route: GeminiRoute) -> None:
         if route.project:
             os.environ["GOOGLE_CLOUD_PROJECT"] = route.project
         os.environ["GOOGLE_CLOUD_LOCATION"] = route.location or "global"
+    else:
+        os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "FALSE"
+        os.environ["GOOGLE_GENAI_USE_ENTERPRISE"] = "FALSE"
 
 
 def build_agent(runtime: ShiftChainToolRuntime) -> LlmAgent:
@@ -125,10 +128,18 @@ async def run_event_through_adk(runtime: ShiftChainToolRuntime, event_id: str) -
                     final_text = part.text
     stored_event = runtime.repository.get_event(event_id)
     stored_request = runtime.repository.get_request(stored_event.request_id) if stored_event else None
+    run = runtime.repository.get_run(stored_event.run_id) if stored_event else None
+    shift_id = stored_request.intent.shift_id if stored_request and stored_request.intent else None
+    shift = run.shifts.get(shift_id) if run and shift_id else None
+    custody = runtime.repository.custody_chain(shift_id) if shift_id else ()
     return {
         "agent_name": agent.name,
         "tool_calls": tool_calls,
         "final_state": stored_request.state.value if stored_request else None,
         "final_text": final_text,
+        "current_owner_id": shift.current_owner_id if shift else None,
+        "shift_version": shift.version if shift else None,
+        "schedule_version": run.schedule_version if run else None,
+        "ledger_ids": [entry.ledger_id for entry in custody],
+        "parsed_intent": runtime.parsed[event_id].model_dump(mode="json") if event_id in runtime.parsed else None,
     }
-
