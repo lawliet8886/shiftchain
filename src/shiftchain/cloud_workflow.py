@@ -49,15 +49,21 @@ class CloudWorkflow:
     def repository(self, run_id: str) -> FirestoreRepository:
         return FirestoreRepository(self.client, run_id)
 
-    def reset(self) -> dict[str, Any]:
+    def reset(self, *, reliability_proof: bool = False) -> dict[str, Any]:
         run_id = FirestoreRepository.next_demo_run_id(self.client)
         try:
             FirestoreRepository.seed_frozen_run(self.client, run_id)
         except AlreadyExists:
             run_id = FirestoreRepository.next_demo_run_id(self.client)
             FirestoreRepository.seed_frozen_run(self.client, run_id)
+        if reliability_proof:
+            self.repository(run_id).configure_failure_injection("LOST_ACK_AFTER_VERIFY_ONCE")
         log_event(LOGGER, "demo_run_seeded", run_id=run_id, operation="reset", result="PASS")
-        return {"run_id": run_id, "status": "SEEDED"}
+        return {
+            "run_id": run_id,
+            "status": "SEEDED",
+            "reliability_proof": "ON" if reliability_proof else "OFF",
+        }
 
     async def deliver(self, run_id: str, event_id: str) -> dict[str, Any]:
         started = datetime.now(timezone.utc)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from importlib.resources import files
 import os
 
 from fastapi import Body, FastAPI, Header, HTTPException, Response
@@ -24,6 +25,11 @@ app = FastAPI(title="ShiftChain", version="0.2.0")
 class DeliverRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     run_id: str
+
+
+class ResetDemoRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    reliability_proof: bool = True
 
 
 @lru_cache(maxsize=1)
@@ -62,22 +68,7 @@ def healthz() -> dict:
 
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
-    return """<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>ShiftChain Phase 2</title>
-<style>body{font:16px system-ui;max-width:960px;margin:32px auto;padding:0 16px;color:#17202a}button,input{padding:9px;margin:4px}pre{background:#f4f6f7;padding:16px;overflow:auto}.ok{color:#087830}</style>
-</head><body><h1>ShiftChain</h1><p>Responsibility moves. ShiftChain keeps the truth.</p>
-<p class="ok">Phase 2 cloud vertical slice — demo delay: 15 seconds.</p>
-<button onclick="resetDemo()">New demo run</button><input id="run" placeholder="Run ID">
-<button onclick="deliver('EVT-001')">Deliver EVT-001</button><button onclick="deliver('EVT-003')">Deliver EVT-003</button><button onclick="deliver('EVT-004')">Deliver EVT-004</button>
-<pre id="out">Create or enter a run.</pre>
-<script>
-const out=document.getElementById('out'), run=document.getElementById('run');
-async function resetDemo(){const r=await fetch('/api/demo/reset',{method:'POST'});const j=await r.json();run.value=j.run_id;await refresh()}
-async function deliver(id){const r=await fetch('/api/events/'+id+'/deliver',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({run_id:run.value})});out.textContent=JSON.stringify(await r.json(),null,2);await refresh()}
-async function refresh(){if(!run.value)return;const r=await fetch('/api/runs/'+run.value);out.textContent=JSON.stringify(await r.json(),null,2)}
-setInterval(refresh,2000);
-</script></body></html>"""
+    return files("shiftchain").joinpath("judge_ui.html").read_text(encoding="utf-8")
 
 
 @app.get("/api/runs/{run_id}")
@@ -89,8 +80,8 @@ def get_run(run_id: str):
 
 
 @app.post("/api/demo/reset")
-def reset_demo():
-    return get_workflow().reset()
+def reset_demo(request: ResetDemoRequest = Body(default=ResetDemoRequest())):
+    return get_workflow().reset(reliability_proof=request.reliability_proof)
 
 
 @app.post("/api/events/{event_id}/deliver")

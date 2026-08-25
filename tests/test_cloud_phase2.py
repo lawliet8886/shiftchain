@@ -39,6 +39,16 @@ def test_resume_payload_is_minimal_and_forbids_unknown_fields() -> None:
         ResumePayload(run_id="R", target_event_id="E", resume_generation=1, secret="no")
 
 
+def test_judge_ui_leads_with_responsibility_and_exposes_real_proof() -> None:
+    response = TestClient(web.app).get("/")
+    assert response.status_code == 200
+    assert "Responsibility journey" in response.text
+    assert "Maya" in response.text and "Liam" in response.text and "Sofia" in response.text
+    assert "Noah" in response.text and "Emma" in response.text
+    assert "NO_OP_VERIFIED" in response.text
+    assert "chat" not in response.text.lower()
+
+
 def test_task_id_is_deterministic_and_generation_scoped() -> None:
     first = ResumePayload(run_id="RUN-DEMO-001", target_event_id="EVT-003", resume_generation=1)
     same = first.model_copy()
