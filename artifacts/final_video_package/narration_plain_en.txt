@@ -1,0 +1,19 @@
+A single handoff is easy. A handoff of a handoff is where responsibility starts to get lost. ShiftChain turns messy human messages into a verified chain of responsibility, even when confirmation arrives late or infrastructure retries the same task.
+
+First, Maya hands the shift to Liam. Gemini turns the message into a structured intent, but it cannot change the schedule. Deterministic rules check ownership, consent, and versions. Firestore readback must confirm the change before the handoff becomes verified.
+
+Now Liam hands that same responsibility to Sofia. This is not an independent update. Liam can do it only because the earlier Maya-to-Liam handoff is already part of the custody chain. ShiftChain keeps the whole history instead of replacing it with the latest name.
+
+Next, Noah asks Emma to take another shift, but Emma has not confirmed yet. ShiftChain does not guess. It saves a durable waiting state and schedules a real Cloud Task. Waiting is visible, safe, and persistent.
+
+The first scheduled check wakes up before Emma's confirmation exists. ShiftChain reads Firestore, makes no business change, and exits safely. Nothing is lost, and nothing is invented.
+
+Now Emma confirms. Gemini interprets the confirmation, ShiftChain stores it, and a new resume task is scheduled. From this moment on, I will not click anything.
+
+Cloud Tasks securely wakes the workflow. ShiftChain reloads persistent state, revalidates every rule, transfers the responsibility from Noah to Emma, and independently verifies the result. The workflow finishes itself.
+
+Now Judge Mode runs one controlled reliability test. After the business effect is already verified, the service intentionally returns HTTP five-oh-three, simulating a lost acknowledgement. Cloud Tasks retries the same task. ShiftChain reads before repeating, finds the verified effect, keeps every version unchanged, and records no-op verified instead of applying the transfer twice.
+
+Under the hood, Gemini understands intent. Google A-D-K coordinates the tools. Deterministic code controls every change. Firestore stores the truth. Cloud Tasks handles time and retries. Secret Manager protects the Gemini credential.
+
+This is the live application running on Google Cloud Run. Responsibility moves. ShiftChain keeps the truth.

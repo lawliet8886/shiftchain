@@ -1,0 +1,128 @@
+[
+  {
+    "id": "01_friction",
+    "target_start": "00:00",
+    "target_end": "00:18",
+    "text": "A single handoff is easy. A handoff of a handoff is where responsibility starts to get lost. ShiftChain turns messy human messages into a verified chain of responsibility, even when confirmation arrives late or infrastructure retries the same task.",
+    "pronunciation_notes": [
+      "ShiftChain: say as two words, Shift Chain."
+    ],
+    "pause_after_ms": 500,
+    "visual_target": "Opening friction and ShiftChain value proposition."
+  },
+  {
+    "id": "02_evt001",
+    "target_start": "00:18",
+    "target_end": "00:45",
+    "text": "First, Maya hands the shift to Liam. Gemini turns the message into a structured intent, but it cannot change the schedule. Deterministic rules check ownership, consent, and versions. Firestore readback must confirm the change before the handoff becomes verified.",
+    "pronunciation_notes": [
+      "Maya: MY-uh.",
+      "Liam: LEE-um.",
+      "Gemini: JEM-in-eye.",
+      "Firestore: FIRE-store."
+    ],
+    "pause_after_ms": 700,
+    "visual_target": "EVT-001, Maya-to-Liam transfer progressing to VERIFIED."
+  },
+  {
+    "id": "03_evt002",
+    "target_start": "00:45",
+    "target_end": "01:10",
+    "text": "Now Liam hands that same responsibility to Sofia. This is not an independent update. Liam can do it only because the earlier Maya-to-Liam handoff is already part of the custody chain. ShiftChain keeps the whole history instead of replacing it with the latest name.",
+    "pronunciation_notes": [
+      "Liam: LEE-um.",
+      "Sofia: soh-FEE-uh.",
+      "Maya: MY-uh.",
+      "Maya-to-Liam: keep the names distinct with a light pause around 'to'."
+    ],
+    "pause_after_ms": 700,
+    "visual_target": "EVT-002, Liam-to-Sofia transfer and visible custody history."
+  },
+  {
+    "id": "04_evt003",
+    "target_start": "01:10",
+    "target_end": "01:35",
+    "text": "Next, Noah asks Emma to take another shift, but Emma has not confirmed yet. ShiftChain does not guess. It saves a durable waiting state and schedules a real Cloud Task. Waiting is visible, safe, and persistent.",
+    "pronunciation_notes": [
+      "Noah: NOH-uh.",
+      "Emma: EM-uh.",
+      "Cloud Task: brief natural separation between the words."
+    ],
+    "pause_after_ms": 800,
+    "visual_target": "EVT-003 entering durable waiting state with a scheduled Cloud Task."
+  },
+  {
+    "id": "05_early_wake",
+    "target_start": "01:35",
+    "target_end": "01:55",
+    "text": "The first scheduled check wakes up before Emma's confirmation exists. ShiftChain reads Firestore, makes no business change, and exits safely. Nothing is lost, and nothing is invented.",
+    "pronunciation_notes": [
+      "Emma: EM-uh.",
+      "Firestore: FIRE-store."
+    ],
+    "pause_after_ms": 900,
+    "visual_target": "Early scheduled wake showing a safe no-change outcome."
+  },
+  {
+    "id": "06_evt004",
+    "target_start": "01:55",
+    "target_end": "02:20",
+    "text": "Now Emma confirms. Gemini interprets the confirmation, ShiftChain stores it, and a new resume task is scheduled. From this moment on, I will not click anything.",
+    "pronunciation_notes": [
+      "Emma: EM-uh.",
+      "Gemini: JEM-in-eye.",
+      "Deliver the last sentence deliberately and hold the documented pause after 'anything.'"
+    ],
+    "pause_after_ms": 1500,
+    "visual_target": "EVT-004 confirmation followed by the explicit zero-click boundary."
+  },
+  {
+    "id": "07_autonomous_resume",
+    "target_start": "02:20",
+    "target_end": "02:42",
+    "text": "Cloud Tasks securely wakes the workflow. ShiftChain reloads persistent state, revalidates every rule, transfers the responsibility from Noah to Emma, and independently verifies the result. The workflow finishes itself.",
+    "pronunciation_notes": [
+      "Noah: NOH-uh.",
+      "Emma: EM-uh."
+    ],
+    "pause_after_ms": 800,
+    "visual_target": "Authenticated autonomous resume completing Noah-to-Emma as VERIFIED."
+  },
+  {
+    "id": "08_reliability",
+    "target_start": "02:42",
+    "target_end": "03:08",
+    "text": "Now Judge Mode runs one controlled reliability test. After the business effect is already verified, the service intentionally returns HTTP five-oh-three, simulating a lost acknowledgement. Cloud Tasks retries the same task. ShiftChain reads before repeating, finds the verified effect, keeps every version unchanged, and records no-op verified instead of applying the transfer twice.",
+    "pronunciation_notes": [
+      "HTTP five-oh-three: say the letters H-T-T-P, then five-oh-three.",
+      "no-op verified: say 'no op verified'; never speak underscores.",
+      "This is the tightest segment; keep it clear and within the 125–145 WPM target."
+    ],
+    "pause_after_ms": 500,
+    "visual_target": "Judge Mode fault injection, retry, and NO_OP_VERIFIED evidence."
+  },
+  {
+    "id": "09_architecture",
+    "target_start": "03:08",
+    "target_end": "03:30",
+    "text": "Under the hood, Gemini understands intent. Google A-D-K coordinates the tools. Deterministic code controls every change. Firestore stores the truth. Cloud Tasks handles time and retries. Secret Manager protects the Gemini credential.",
+    "pronunciation_notes": [
+      "Gemini: JEM-in-eye.",
+      "A-D-K: say each letter separately.",
+      "Firestore: FIRE-store."
+    ],
+    "pause_after_ms": 700,
+    "visual_target": "Architecture diagram while the narration names each component's role."
+  },
+  {
+    "id": "10_closing",
+    "target_start": "03:30",
+    "target_end": "03:40",
+    "text": "This is the live application running on Google Cloud Run. Responsibility moves. ShiftChain keeps the truth.",
+    "pronunciation_notes": [
+      "ShiftChain: say as two words, Shift Chain."
+    ],
+    "pause_after_ms": 0,
+    "visual_target": "Live Cloud Run application and final ShiftChain closing frame."
+  }
+]

@@ -110,8 +110,8 @@ Real-cloud evidence: [Phase 3 gate](artifacts/PHASE3_GATE.md) and [reliability p
 Requirements: Python 3.12, a Gemini API key for real parsing, and Google Cloud ADC only if exercising the cloud adapter.
 
 ```powershell
-git clone <REPOSITORY_URL>
-cd ShiftChain
+git clone https://github.com/lawliet8886/shiftchain.git
+cd shiftchain
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
