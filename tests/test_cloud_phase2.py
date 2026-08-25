@@ -326,9 +326,12 @@ def test_internal_route_rejects_anonymous_before_workflow() -> None:
         web.app.dependency_overrides.clear()
 
 
-def test_health_aliases_are_side_effect_free() -> None:
+def test_canonical_health_is_documented_and_side_effect_free() -> None:
     client = TestClient(web.app)
-    for path in ("/health", "/healthz", "/healthz/"):
-        response = client.get(path)
-        assert response.status_code == 200
-        assert response.json()["status"] == "ok"
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+    paths = client.get("/openapi.json").json()["paths"]
+    assert "/health" in paths
+    assert "/healthz" not in paths
+    assert "/healthz/" not in paths

@@ -39,13 +39,13 @@ def get_oidc_validator() -> OIDCValidator:
 
 @app.get("/health", include_in_schema=True)
 @app.get("/healthz/", include_in_schema=False)
-@app.get("/healthz")
+@app.get("/healthz", include_in_schema=False)
 def healthz() -> dict:
     """Process-only health check: no Gemini, Firestore or Tasks call.
 
     Cloud Run reserves some paths ending in ``z`` at the Google Frontend, so
-    ``/health`` is the deployable canonical endpoint while the frozen
-    ``/healthz`` contract remains available locally and in OpenAPI.
+    ``/health`` is the canonical endpoint. The old paths remain as unlisted
+    local compatibility aliases only.
     """
     return {
         "status": "ok",
