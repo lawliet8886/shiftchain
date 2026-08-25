@@ -2,7 +2,7 @@
   "schema_version": "1.1",
   "observed_at": "2026-08-25T13:43:00Z",
   "phase": "PHASE_2_RECOVERY",
-  "gate": "PARTIAL",
+  "gate": "PASS",
   "project": {
     "project_id": "gen-lang-client-0643751280",
     "name": "concurso",
@@ -14,7 +14,7 @@
     "region": "us-central1",
     "firestore_database": "shiftchain",
     "cloud_run_service": "shiftchain-demo",
-    "cloud_run_revision": "shiftchain-demo-00003-h8r",
+    "cloud_run_revision": "shiftchain-demo-00004-zfr",
     "cloud_tasks_queue": "shiftchain-resume",
     "runtime_service_account": "shiftchain-runtime",
     "task_caller_service_account": "shiftchain-task-caller",
@@ -89,11 +89,17 @@
     "wrong_identity": 403
   },
   "health": {
+    "canonical_endpoint": "/health",
+    "canonical_status": 200,
+    "public_authentication_required": false,
+    "gemini_calls": 0,
+    "firestore_writes": 0,
+    "cloud_tasks_created": 0,
+    "openapi_documents_canonical_only": true,
     "cloud_run_known_reserved_path": true,
-    "/health": 200,
-    "/healthz/": 200,
-    "/healthz": 404
+    "historical_/healthz_status": 404
   },
+  "freeze_classification": "RESILIENCE / PLATFORM COMPATIBILITY CLARIFICATIONS ONLY",
   "tests_passed": 39,
   "phase_3_started": false
 }

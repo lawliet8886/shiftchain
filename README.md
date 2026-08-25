@@ -6,7 +6,7 @@ ShiftChain turns messy operational handoff messages into safe, deterministic and
 
 ## Phase 2 status
 
-The cloud vertical slice is deployed in the dedicated Google Cloud project `gen-lang-client-0643751280`. Firestore, Cloud Run, Cloud Tasks, Secret Manager and app-level OIDC validation are live. The autonomous resume is latency-independent: an early g1 wake safely records an unmet condition, and a later verified confirmation advances the generation and creates an immediate authenticated g2 wake. The recovery run finished Noah → Emma exactly once. The gate is partial only because Cloud Run reserves some paths ending in `z`, so `/healthz` is rejected by the Google Frontend; `/health` and `/healthz/` both return 200 without side effects. See `artifacts/PHASE2_GATE.md`. Phase 3 has not started.
+The cloud vertical slice is deployed in the dedicated Google Cloud project `gen-lang-client-0643751280`. Firestore, Cloud Run, Cloud Tasks, Secret Manager and app-level OIDC validation are live. The autonomous resume is latency-independent: an early g1 wake safely records an unmet condition, and a later verified confirmation advances the generation and creates an immediate authenticated g2 wake. The recovery run finished Noah → Emma exactly once. Phase 2 passed after approving `/health` as the canonical Cloud Run-safe health endpoint; the original `/healthz` 404 remains preserved in the gate evidence. See `artifacts/PHASE2_GATE.md`. Phase 3 has not started.
 
 ## Phase 1 foundation
 

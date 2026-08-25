@@ -1,10 +1,10 @@
-# Phase 2 Gate — RECOVERY PARTIAL
+# Phase 2 Gate — PASSED
 
 Date: 2026-08-25 (America/Sao_Paulo)
 
 ## Gate decision
 
-The original latency blocker is resolved. The autonomous recovery flow passed in the real cloud. The overall gate is **PARTIAL** only because the exact `/healthz` path cannot return 200 through the Cloud Run Google Frontend; Phase 3 was not started.
+The original latency blocker is resolved, the autonomous recovery flow passed in the real cloud, and `/health` is approved as the canonical Cloud Run-safe health endpoint. Phase 2 is **PASSED**. Phase 3 was not started.
 
 ## Confirmed cloud environment
 
@@ -74,13 +74,38 @@ No user action occurred after EVT-004 delivery; only Firestore reads observed co
 
 ## Health endpoint finding
 
-Revision `shiftchain-demo-00003-h8r` serves 100% of traffic and registers `/healthz` in OpenAPI. Cloud Run rejects the exact path at the Google Frontend because its documented known issues reserve some paths ending in `z`.
+The original specification used `/healthz`. During the real Cloud Run deployment, Google Frontend intercepted the exact `/healthz` path before it reached the container. Cloud Run documents some paths ending in `z` as reserved and recommends avoiding all such paths. ShiftChain therefore uses `/health` as its canonical health endpoint. This is an infrastructure compatibility clarification and does not alter the product architecture.
+
+Revision `shiftchain-demo-00004-zfr` serves 100% of traffic and publishes only `/health` in OpenAPI.
 
 - `/health`: HTTP 200.
-- `/healthz/`: HTTP 200.
-- `/healthz`: Google Frontend HTTP 404 before the container.
+- Public authentication required: no.
+- Tasks before/after health call: 0 → 0.
+- Firestore reference document update time before/after: unchanged.
+- Gemini calls: none.
+- Secret exposure: none.
+- Historical `/healthz`: Google Frontend HTTP 404 before the container.
 
-No second service, load balancer or other infrastructure was created to bypass the restriction. This is the sole remaining gate item.
+No second service, load balancer or other infrastructure was created. The health criterion is satisfied by the approved platform compatibility clarification.
+
+## Final gate checklist
+
+- [x] Slice A real
+- [x] Firestore persistence
+- [x] Cloud Run
+- [x] Gemini real and ADK real in Cloud Run
+- [x] Cloud Tasks and application-level OIDC
+- [x] Anonymous, wrong audience and wrong identity rejection
+- [x] EVT-003 WAITING and early wake safe no-op
+- [x] EVT-004 confirmation persisted
+- [x] Generation g1 → g2 and autonomous g2 wake
+- [x] Resume without Gemini
+- [x] Noah → Emma, APPLIED, independent readback and VERIFIED
+- [x] Shift and schedule versions incremented exactly once
+- [x] Stale/future generation safety and duplicate idempotency
+- [x] Canonical `/health` returns public HTTP 200 without side effects
+- [x] All tests green and secret scan clean
+- [x] No Phase 3 activity
 
 ## Freeze and security
 
@@ -88,4 +113,4 @@ No second service, load balancer or other infrastructure was created to bypass t
 - No secret, OIDC token, Authorization header or service-account JSON key was stored or printed.
 - No broad Editor/Owner role was granted to either ShiftChain service account.
 - No forced 503, local sleep fallback, background worker, browser timer or Phase 3 feature was added.
-- Freeze deviation: resilience clarification only; domain data, state machine and deterministic engine are unchanged.
+- Freeze classification: **RESILIENCE / PLATFORM COMPATIBILITY CLARIFICATIONS ONLY**. The latency-independent generation-triggered resume and canonical `/health` endpoint do not alter the frozen product.

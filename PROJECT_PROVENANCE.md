@@ -3,7 +3,7 @@
 - Project: ShiftChain
 - Organization: Harborlight Community Operations (HCO)
 - Frozen tagline: “Responsibility moves. ShiftChain keeps the truth.”
-- Phase: Phase 2 Recovery — autonomous resume proven; exact `/healthz` gate remains partial; Phase 3 not started
+- Phase: Phase 2 passed — autonomous cloud resume proven; Phase 3 not started
 - Created locally: 2026-08-25, America/Sao_Paulo
 - Source specification: user-provided Phase 0 freeze and Phase 1 build brief in the Codex task
 - Authorized cloud project: `gen-lang-client-0643751280` (`concurso`); no other accessible project was used
