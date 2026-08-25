@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.0",
-  "observed_at": "2026-08-25T13:22:00Z",
-  "phase": "PHASE_2",
-  "gate": "BLOCKED",
+  "schema_version": "1.1",
+  "observed_at": "2026-08-25T13:43:00Z",
+  "phase": "PHASE_2_RECOVERY",
+  "gate": "PARTIAL",
   "project": {
     "project_id": "gen-lang-client-0643751280",
     "name": "concurso",
@@ -14,6 +14,7 @@
     "region": "us-central1",
     "firestore_database": "shiftchain",
     "cloud_run_service": "shiftchain-demo",
+    "cloud_run_revision": "shiftchain-demo-00003-h8r",
     "cloud_tasks_queue": "shiftchain-resume",
     "runtime_service_account": "shiftchain-runtime",
     "task_caller_service_account": "shiftchain-task-caller",
@@ -22,15 +23,64 @@
     "cloud_run_max_instances": 2,
     "demo_delay_seconds": 15
   },
-  "slice_a": {
-    "run_id": "P2TEST-SLICE-A-20260825",
-    "event": "EVT-001",
+  "historical_blocker": {
+    "summary": "Initial design assumed confirmation parsing would complete before the 15-second demo wake. Real Gemini latency disproved the assumption.",
+    "preserved_runs": [
+      {
+        "run_id": "P2TEST-SLICE-B2-20260825",
+        "evt004_cloud_run_latency_seconds": 27.720509049,
+        "wake_preceded_confirmation": true
+      },
+      {
+        "run_id": "P2TEST-SLICE-B3-20260825",
+        "evt004_cloud_run_latency_seconds": 16.051062237,
+        "wake_preceded_confirmation": true
+      }
+    ]
+  },
+  "design_correction": {
+    "type": "CONFIRMATION_TRIGGERED_RESUME_GENERATION",
+    "initial_wake_semantics": "CHECK_WAIT_CONDITION",
+    "task_first_commit_second": true,
+    "resume_calls_gemini": false,
+    "domain_model_changed": false
+  },
+  "slice_a_regression": {
+    "run_id": "P2RECOVERY-SLICEA-20260825",
     "state": "VERIFIED",
+    "agent": "shiftchain_agent",
     "owner": "W-002",
     "shift_version": 1,
     "schedule_version": 1,
-    "custody": ["W-001", "W-002"],
-    "cloud_run_latency_seconds": 12.50822323
+    "verification_present": true
+  },
+  "recovery_run": {
+    "run_id": "P2RECOVERY-20260825-001",
+    "evt003_delivered_at": "2026-08-25T13:39:37.694805Z",
+    "evt003_completed_at": "2026-08-25T13:40:01.396068Z",
+    "g1_dispatched_at": "2026-08-25T13:40:16.125687Z",
+    "g1_result": "WAIT_CONDITION_NOT_MET",
+    "evt004_delivered_at": "2026-08-25T13:40:41.674552Z",
+    "evt004_latency_seconds": 15.099667826,
+    "confirmation_persisted_at": "2026-08-25T13:40:56.669998Z",
+    "generation_transition": "g1 -> g2",
+    "g2_dispatched_at": "2026-08-25T13:40:56.679019Z",
+    "g2_latency_seconds": 0.847699319,
+    "applied_at": "2026-08-25T13:40:56.990219Z",
+    "verified_at": "2026-08-25T13:40:57.262426Z",
+    "final_state": "VERIFIED",
+    "final_owner": "W-005",
+    "shift_version": 1,
+    "schedule_version": 1,
+    "custody": ["W-004", "W-005"],
+    "no_click_after_evt004": true
+  },
+  "idempotency": {
+    "stale_g1": "STALE_GENERATION_NO_OP",
+    "duplicate_g2": "ALREADY_VERIFIED_NO_OP",
+    "future_g3": "RETRYABLE_NO_MUTATION",
+    "final_shift_version": 1,
+    "final_schedule_version": 1
   },
   "oidc": {
     "valid_task_caller": 204,
@@ -38,29 +88,12 @@
     "wrong_audience": 401,
     "wrong_identity": 403
   },
-  "slice_b": {
-    "state": "BLOCKED",
-    "attempts": [
-      {
-        "run_id": "P2TEST-SLICE-B2-20260825",
-        "evt004_dispatch_after_evt003_seconds": 0.949453,
-        "evt004_cloud_run_latency_seconds": 27.720509049,
-        "wake_preceded_confirmation": true
-      },
-      {
-        "run_id": "P2TEST-SLICE-B3-20260825",
-        "evt004_dispatch_after_evt003_seconds": 0.410091,
-        "evt004_cloud_run_latency_seconds": 16.051062237,
-        "wake_preceded_confirmation": true
-      }
-    ],
-    "final_owner": "W-004",
-    "shift_version": 0,
-    "schedule_version": 0,
-    "confirmation_evidence_present": true,
-    "transfer_applied": false,
-    "verified": false,
-    "fail_closed": true
+  "health": {
+    "cloud_run_known_reserved_path": true,
+    "/health": 200,
+    "/healthz/": 200,
+    "/healthz": 404
   },
+  "tests_passed": 39,
   "phase_3_started": false
 }

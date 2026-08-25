@@ -3,7 +3,7 @@
 - Project: ShiftChain
 - Organization: Harborlight Community Operations (HCO)
 - Frozen tagline: “Responsibility moves. ShiftChain keeps the truth.”
-- Phase: Phase 2 — Cloud Vertical Slice gate blocked; Phase 3 not started
+- Phase: Phase 2 Recovery — autonomous resume proven; exact `/healthz` gate remains partial; Phase 3 not started
 - Created locally: 2026-08-25, America/Sao_Paulo
 - Source specification: user-provided Phase 0 freeze and Phase 1 build brief in the Codex task
 - Authorized cloud project: `gen-lang-client-0643751280` (`concurso`); no other accessible project was used
@@ -15,5 +15,6 @@
   - Firestore databases: https://cloud.google.com/firestore/docs/manage-databases
   - Cloud Tasks HTTP targets and OIDC: https://cloud.google.com/tasks/docs/creating-http-target-tasks
   - Cloud Run service-to-service authentication: https://cloud.google.com/run/docs/authenticating/service-to-service
+  - Cloud Run known reserved URL paths: https://cloud.google.com/run/docs/known-issues
 - Scope boundary: one named Firestore database, one Cloud Run service and one Cloud Tasks queue; no remote repository, custom Dockerfile, CI/CD, failure injection or Phase 3.
 - Data policy: the demo organization, workers, shifts, and messages are synthetic.
