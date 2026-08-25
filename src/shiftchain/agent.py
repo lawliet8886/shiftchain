@@ -12,7 +12,7 @@ from shiftchain.engine import ReconciliationEngine
 from shiftchain.frozen_data import candidate_context
 from shiftchain.models import RequestRecord, StructuredIntent
 from shiftchain.parser import GeminiIntentParser, GeminiRoute, MODEL_ID
-from shiftchain.repository import InMemoryRepository
+from shiftchain.repository import ShiftChainRepository
 
 AGENT_NAME = "shiftchain_agent"
 APP_NAME = "shiftchain_phase1"
@@ -20,7 +20,7 @@ APP_NAME = "shiftchain_phase1"
 
 @dataclass
 class ShiftChainToolRuntime:
-    repository: InMemoryRepository
+    repository: ShiftChainRepository
     parser: GeminiIntentParser
     engine: ReconciliationEngine = field(init=False)
     parsed: dict[str, StructuredIntent] = field(default_factory=dict)

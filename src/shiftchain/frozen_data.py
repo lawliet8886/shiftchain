@@ -87,7 +87,7 @@ def frozen_repository(*, authorized: bool = True, expired: bool = False) -> InMe
 
 def candidate_context(repository: InMemoryRepository, event_id: str) -> CandidateContext:
     event = repository.get_event(event_id)
-    run = repository.get_run("RUN-DEMO-001")
+    run = repository.get_run(event.run_id) if event else None
     if event is None or run is None:
         raise KeyError(event_id)
     requests = {
@@ -108,4 +108,3 @@ def candidate_context(repository: InMemoryRepository, event_id: str) -> Candidat
         shift_candidates=shifts,
         request_candidates=requests,
     )
-

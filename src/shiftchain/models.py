@@ -48,7 +48,10 @@ class LanguageCode(StrEnum):
 
 class LedgerEventType(StrEnum):
     INITIAL_ASSIGNMENT = "INITIAL_ASSIGNMENT"
-    TRANSFER = "TRANSFER"
+    TRANSFER_APPLIED = "TRANSFER_APPLIED"
+    TRANSFER = "TRANSFER_APPLIED"
+    TRANSFER_VERIFIED = "TRANSFER_VERIFIED"
+    NO_OP_VERIFIED = "NO_OP_VERIFIED"
 
 
 class Evidence(StrictModel):
@@ -217,4 +220,3 @@ class ProcessingResult(StrictModel):
     reason_codes: tuple[str, ...]
     idempotent: bool = False
     ledger_id: str | None = None
-
