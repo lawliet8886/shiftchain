@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "executed_at": "2026-08-25",
+  "timezone": "UTC",
+  "environment": {
+    "project_id": "gen-lang-client-0643751280",
+    "region": "us-central1",
+    "cloud_run_service": "shiftchain-demo",
+    "firestore_database": "shiftchain",
+    "cloud_tasks_queue": "shiftchain-resume",
+    "gemini_model": "gemini-3.7-flash",
+    "adk_agent": "shiftchain_agent",
+    "fault_injection": "LOST_ACK_AFTER_VERIFY_ONCE"
+  },
+  "method": "Each measurement starts immediately before Reset Demo and ends when GET polling observes NO_OP_VERIFIED. EVT-001 through EVT-004 were delivered manually; after EVT-004, only read-only polling was used.",
+  "runs": [
+    {
+      "sequence": 1,
+      "run_id": "RUN-DEMO-002",
+      "started_at": "2026-08-25T15:16:03.7397817Z",
+      "completed_at": "2026-08-25T15:18:16.3755445Z",
+      "duration_seconds": 128.857,
+      "latency_seconds": {"reset": 1.552, "evt_001": 23.554, "evt_002": 25.187, "evt_003": 31.106, "g1_wait": 15.080, "evt_004": 23.802, "post_evt_004_autonomous": 8.423},
+      "final_state": {"chain_a": "Maya -> Liam -> Sofia", "chain_b": "Noah -> Emma", "request_state": "VERIFIED", "schedule_version": 3, "chain_a_shift_version": 2, "chain_b_shift_version": 1},
+      "custody": {"chain_a_workers": ["W-001", "W-002", "W-003"], "chain_b_workers": ["W-004", "W-005"]},
+      "reliability": {"http_503_count": 1, "noop_verified_count": 1, "fault_used": true, "version_duplicate": false, "custody_duplicate": false},
+      "queue_depth_final": 0,
+      "click_or_post_after_evt_004": false,
+      "completed": true
+    },
+    {
+      "sequence": 2,
+      "run_id": "RUN-DEMO-003",
+      "started_at": "2026-08-25T15:18:16.4019149Z",
+      "completed_at": "2026-08-25T15:20:24.1255473Z",
+      "duration_seconds": 125.706,
+      "latency_seconds": {"reset": 0.584, "evt_001": 30.779, "evt_002": 18.898, "evt_003": 36.531, "g1_wait": 15.446, "evt_004": 15.977, "post_evt_004_autonomous": 7.479},
+      "final_state": {"chain_a": "Maya -> Liam -> Sofia", "chain_b": "Noah -> Emma", "request_state": "VERIFIED", "schedule_version": 3, "chain_a_shift_version": 2, "chain_b_shift_version": 1},
+      "custody": {"chain_a_workers": ["W-001", "W-002", "W-003"], "chain_b_workers": ["W-004", "W-005"]},
+      "reliability": {"http_503_count": 1, "noop_verified_count": 1, "fault_used": true, "version_duplicate": false, "custody_duplicate": false},
+      "queue_depth_final": 0,
+      "click_or_post_after_evt_004": false,
+      "completed": true
+    },
+    {
+      "sequence": 3,
+      "run_id": "RUN-DEMO-004",
+      "started_at": "2026-08-25T15:20:24.1267340Z",
+      "completed_at": "2026-08-25T15:22:03.8348301Z",
+      "duration_seconds": 97.413,
+      "latency_seconds": {"reset": 0.541, "evt_001": 16.413, "evt_002": 29.012, "evt_003": 10.726, "g1_wait": 16.220, "evt_004": 16.603, "post_evt_004_autonomous": 7.887},
+      "final_state": {"chain_a": "Maya -> Liam -> Sofia", "chain_b": "Noah -> Emma", "request_state": "VERIFIED", "schedule_version": 3, "chain_a_shift_version": 2, "chain_b_shift_version": 1},
+      "custody": {"chain_a_workers": ["W-001", "W-002", "W-003"], "chain_b_workers": ["W-004", "W-005"]},
+      "reliability": {"http_503_count": 1, "noop_verified_count": 1, "fault_used": true, "version_duplicate": false, "custody_duplicate": false},
+      "queue_depth_final": 0,
+      "click_or_post_after_evt_004": false,
+      "completed": true
+    },
+    {
+      "sequence": 4,
+      "run_id": "RUN-DEMO-005",
+      "started_at": "2026-08-25T15:22:03.8353573Z",
+      "completed_at": "2026-08-25T15:23:38.2310397Z",
+      "duration_seconds": 91.787,
+      "latency_seconds": {"reset": 0.713, "evt_001": 21.143, "evt_002": 11.468, "evt_003": 26.444, "g1_wait": 15.688, "evt_004": 10.105, "post_evt_004_autonomous": 6.219},
+      "final_state": {"chain_a": "Maya -> Liam -> Sofia", "chain_b": "Noah -> Emma", "request_state": "VERIFIED", "schedule_version": 3, "chain_a_shift_version": 2, "chain_b_shift_version": 1},
+      "custody": {"chain_a_workers": ["W-001", "W-002", "W-003"], "chain_b_workers": ["W-004", "W-005"]},
+      "reliability": {"http_503_count": 1, "noop_verified_count": 1, "fault_used": true, "version_duplicate": false, "custody_duplicate": false},
+      "queue_depth_final": 0,
+      "click_or_post_after_evt_004": false,
+      "completed": true
+    },
+    {
+      "sequence": 5,
+      "run_id": "RUN-DEMO-006",
+      "started_at": "2026-08-25T15:23:38.2313798Z",
+      "completed_at": "2026-08-25T15:25:18.4080466Z",
+      "duration_seconds": 96.001,
+      "latency_seconds": {"reset": 0.638, "evt_001": 13.321, "evt_002": 25.225, "evt_003": 17.053, "g1_wait": 15.079, "evt_004": 16.582, "post_evt_004_autonomous": 8.099},
+      "final_state": {"chain_a": "Maya -> Liam -> Sofia", "chain_b": "Noah -> Emma", "request_state": "VERIFIED", "schedule_version": 3, "chain_a_shift_version": 2, "chain_b_shift_version": 1},
+      "custody": {"chain_a_workers": ["W-001", "W-002", "W-003"], "chain_b_workers": ["W-004", "W-005"]},
+      "reliability": {"http_503_count": 1, "noop_verified_count": 1, "fault_used": true, "version_duplicate": false, "custody_duplicate": false},
+      "queue_depth_final": 0,
+      "click_or_post_after_evt_004": false,
+      "completed": true
+    }
+  ],
+  "aggregate": {
+    "successful_runs": 5,
+    "total_runs": 5,
+    "average_duration_seconds": 107.953,
+    "minimum_duration_seconds": 91.787,
+    "maximum_duration_seconds": 128.857,
+    "all_under_225_seconds": true,
+    "all_queue_clean": true,
+    "all_exactly_once": true,
+    "all_real_cloud": true
+  }
+}
