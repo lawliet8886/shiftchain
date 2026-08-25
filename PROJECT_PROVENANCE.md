@@ -3,7 +3,7 @@
 - Project: ShiftChain
 - Organization: Harborlight Community Operations (HCO)
 - Frozen tagline: “Responsibility moves. ShiftChain keeps the truth.”
-- Phase: Phase 4 in progress — judge-facing product and demo readiness
+- Phase: Phase 4 passed — judge-facing product and demo ready
 - Created locally: 2026-08-25, America/Sao_Paulo
 - Source specification: user-provided Phase 0 freeze and Phase 1 build brief in the Codex task
 - Authorized cloud project: `gen-lang-client-0643751280` (`concurso`); no other accessible project was used
@@ -22,6 +22,6 @@
 - Phase 3 implementation: explicit DEMO-only, Firestore-persisted, transactional one-shot lost-acknowledgement injection plus deterministic read-before-repeat and non-custody `NO_OP_VERIFIED` evidence.
 - Cloud services unchanged: one named Firestore database, one Cloud Run service and one Cloud Tasks queue; no new Google Cloud service or external observability stack.
 - Code provenance: Phase 3 reliability code was authored locally for ShiftChain; no external application code was reused.
-- Phase 4 presentation work: one-screen judge UI, architecture diagram, public-quality README and rehearsal/audit artifacts; no new domain feature or cloud service.
+- Phase 4 presentation work: one-screen judge UI, architecture diagram, public-quality README, five successful real-cloud rehearsals and publication-readiness artifacts; no new domain feature or cloud service.
 - Scope boundary: no remote repository, custom Dockerfile, CI/CD, final video upload, Devpost submission or Phase 5 activity.
 - Data policy: the demo organization, workers, shifts, and messages are synthetic.

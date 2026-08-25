@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "audited_at": "2026-08-25",
+  "scope": [
+    "tracked working tree",
+    "all Git patch history",
+    "untracked and ignored environment-file names",
+    "generated browser artifacts",
+    "configured Git remotes"
+  ],
+  "checks": {
+    "gemini_api_key_pattern": {"current_matches": 0, "history_matches": 0, "pass": true},
+    "private_key_block": {"current_matches": 0, "history_matches": 0, "pass": true},
+    "oauth_token_pattern": {"current_matches": 0, "history_matches": 0, "pass": true},
+    "jwt_pattern": {"current_matches": 0, "history_matches": 0, "pass": true},
+    "credential_assignment": {"current_matches": 0, "history_real_secret_matches": 0, "history_placeholder_matches": 1, "pass": true, "note": "The only history match is the literal README placeholder <YOUR_GEMINI_API_KEY>."},
+    "tracked_dotenv": {"matches": 0, "pass": true},
+    "local_dotenv": {"exists": true, "git_ignored": true, "cloud_build_ignored": true, "content_read_or_exported": false, "pass": true, "note": "Local credentials remain outside Git and outside gcloud source upload."},
+    "service_account_key_files": {"matches": 0, "pass": true},
+    "personal_windows_path": {"current_matches": 0, "history_matches": 0, "pass": true},
+    "personal_username": {"current_matches": 0, "history_matches": 0, "pass": true},
+    "private_email": {"matches": 0, "pass": true, "note": "All email-shaped tracked values use example.com test identities."},
+    "user_specified_real_institution_names": {"terms_recorded_in_public_artifact": false, "current_matches": 0, "history_matches": 0, "pass": true},
+    "real_personal_data": {"matches": 0, "pass": true, "note": "All organization, worker, shift and message data are synthetic."},
+    "generated_logs": {"tracked_matches": 0, "pass": true},
+    "browser_test_artifacts": {"remaining_untracked_matches": 0, "pass": true, "note": "Playwright snapshots, temporary screenshots and local output were removed after QA."},
+    "git_remotes": {"count": 0, "pass": true}
+  },
+  "allowed_public_identifiers": [
+    "gen-lang-client-0643751280",
+    "shiftchain-demo",
+    "shiftchain-resume",
+    "shiftchain-gemini-api-key",
+    "Google-managed project service-account identities",
+    "the public Cloud Run URL"
+  ],
+  "publication_boundary": "Safe for a future Git publication from tracked content. No remote, publication, upload or submission was created in Phase 4.",
+  "PUBLICATION_SAFE": true
+}
