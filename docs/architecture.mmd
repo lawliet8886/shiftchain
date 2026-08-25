@@ -1,0 +1,28 @@
+flowchart LR
+    J[Judge / Browser] -->|HTTPS| CR
+
+    subgraph GCP[Google Cloud · us-central1]
+      CR[Cloud Run · shiftchain-demo\nJudge UI · API · resume handler]
+      ADK[Google ADK\nshiftchain_agent · bounded tools]
+      ENG[Deterministic reconciliation engine\nconsent · versions · custody · idempotency]
+      FS[(Firestore · shiftchain\npersistent truth · checkpoints · ledger)]
+      CT[Cloud Tasks · shiftchain-resume\ndelayed wake · at-least-once retry]
+      SM[Secret Manager\nGemini API credential]
+
+      CR --> ADK
+      ADK --> ENG
+      ENG -->|transaction + independent readback| FS
+      ENG -->|enqueue generation g1 / g2| CT
+      CT -->|OIDC-authenticated resume| CR
+      SM -. secret reference .-> CR
+    end
+
+    ADK -->|bounded candidate context| GEM[Gemini 3.7 Flash\nstructured ShiftIntent only]
+    GEM -->|schema-valid intent| ADK
+
+    classDef cloud fill:#eef0ff,stroke:#3949ab,color:#202124,stroke-width:2px;
+    classDef truth fill:#e9f6ee,stroke:#177245,color:#202124,stroke-width:2px;
+    classDef time fill:#fff3da,stroke:#a45b00,color:#202124,stroke-width:2px;
+    class CR,ADK,ENG cloud;
+    class FS truth;
+    class CT,SM time;
