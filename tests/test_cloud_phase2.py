@@ -14,6 +14,7 @@ from shiftchain.engine import ReconciliationEngine
 from shiftchain.frozen_data import frozen_repository, intent_for
 from shiftchain.models import RequestState
 from shiftchain.oidc import OIDCAuthenticationError, OIDCAuthorizationError, OIDCValidator
+from shiftchain.reliability import NoOpVerificationResult
 from shiftchain.tasks import CloudTaskScheduler, ResumePayload, ScheduledTask, task_id_for
 from shiftchain import web
 
@@ -137,6 +138,22 @@ class ResumeRepository:
         assert event_id == "EVT-003"
         self.metadata["activity"].append(entry)
         self.metadata["last_result"] = entry["result"]
+
+    def consume_failure_injection(self, event_id: str) -> bool:
+        return False
+
+    def verify_existing_effect(self, event_id: str, **kwargs) -> NoOpVerificationResult:
+        run = self.get_run("RUN-DEMO-001")
+        shift = run.shifts["SHF-260827-M"]
+        return NoOpVerificationResult(
+            True,
+            f"noop:{event_id}:g{kwargs['resume_generation']}",
+            (),
+            shift.current_owner_id,
+            shift.version,
+            run.schedule_version,
+            shift.custody_head_id,
+        )
 
 
 def workflow_with(repository: ResumeRepository) -> CloudWorkflow:
