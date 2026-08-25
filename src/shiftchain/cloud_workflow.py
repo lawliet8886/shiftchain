@@ -15,6 +15,7 @@ from shiftchain.firestore_repository import FirestoreRepository
 from shiftchain.models import ConfirmationStatus, RequestState
 from shiftchain.observability import log_event
 from shiftchain.parser import GeminiIntentParser
+from shiftchain.reliability import NoOpVerificationResult
 from shiftchain.tasks import CloudTaskScheduler, ResumePayload
 
 LOGGER = logging.getLogger("shiftchain.cloud_workflow")
@@ -22,6 +23,16 @@ LOGGER = logging.getLogger("shiftchain.cloud_workflow")
 
 class FutureGenerationError(RuntimeError):
     pass
+
+
+class LostAcknowledgementAfterVerify(RuntimeError):
+    pass
+
+
+class IntegrityVerificationError(RuntimeError):
+    def __init__(self, result: NoOpVerificationResult) -> None:
+        self.result = result
+        super().__init__(f"verified effect failed readback: {','.join(result.errors)}")
 
 
 @dataclass
@@ -179,36 +190,92 @@ class CloudWorkflow:
         if payload.resume_generation > persisted_generation:
             raise FutureGenerationError("task generation is newer than persisted state")
         if metadata.get("workflow_status") == RequestState.VERIFIED.value:
-            repository.record_resume_activity(
+            no_op = repository.verify_existing_effect(
                 payload.target_event_id,
-                result="ALREADY_VERIFIED_NO_OP",
                 resume_generation=payload.resume_generation,
                 task_name=task_name,
                 task_attempt=task_attempt,
             )
-            return 204, {"result": "ALREADY_VERIFIED_NO_OP"}
-        confirmation = metadata.get("confirmation_evidence")
-        if not confirmation:
-            repository.record_resume_activity(
-                payload.target_event_id,
-                result="WAIT_CONDITION_NOT_MET",
-                resume_generation=payload.resume_generation,
+            if not no_op.verified:
+                log_event(
+                    LOGGER,
+                    "verified_effect_integrity_error",
+                    run_id=payload.run_id,
+                    source_event_id=payload.target_event_id,
+                    task_name=task_name,
+                    task_attempt=task_attempt,
+                    resume_generation=payload.resume_generation,
+                    errors=no_op.errors,
+                    operation="read_before_repeat",
+                    result="INTEGRITY_ERROR",
+                )
+                raise IntegrityVerificationError(no_op)
+            log_event(
+                LOGGER,
+                "verified_effect_no_op",
+                run_id=payload.run_id,
+                source_event_id=payload.target_event_id,
                 task_name=task_name,
                 task_attempt=task_attempt,
+                resume_generation=payload.resume_generation,
+                workflow_status=RequestState.VERIFIED.value,
+                shift_version=no_op.observed_shift_version,
+                schedule_version=no_op.observed_schedule_version,
+                custody_head=no_op.custody_head_event_id,
+                evidence_id=no_op.evidence_id,
+                operation="read_before_repeat",
+                result="NO_OP_VERIFIED",
             )
-            return 204, {"result": "STILL_WAITING_CONFIRMATION"}
-
+            return 204, {"result": "NO_OP_VERIFIED", "evidence_id": no_op.evidence_id}
         request_id = metadata["request_id"]
         request = repository.get_request(request_id)
         if request is None or request.intent is None:
             raise RuntimeError("resume checkpoint is incomplete")
-        resumed_intent = request.intent.model_copy(
-            update={
-                "confirmation": ConfirmationStatus.PRESENT,
-                "confirmation_by_worker_id": confirmation["confirmed_by_worker_id"],
-            }
-        )
-        result = ReconciliationEngine(repository).process(payload.target_event_id, resumed_intent)
+        engine = ReconciliationEngine(repository)
+        if metadata.get("workflow_status") == RequestState.APPLIED.value:
+            if not request.applied_ledger_id:
+                raise IntegrityVerificationError(NoOpVerificationResult(False, None, ("APPLIED_LEDGER_ID_MISSING",)))
+            result = engine.verify_outcome(request, request.applied_ledger_id)
+            resumed_intent = request.intent
+        else:
+            confirmation = metadata.get("confirmation_evidence")
+            if not confirmation:
+                repository.record_resume_activity(
+                    payload.target_event_id,
+                    result="WAIT_CONDITION_NOT_MET",
+                    resume_generation=payload.resume_generation,
+                    task_name=task_name,
+                    task_attempt=task_attempt,
+                )
+                return 204, {"result": "STILL_WAITING_CONFIRMATION"}
+            resumed_intent = request.intent.model_copy(
+                update={
+                    "confirmation": ConfirmationStatus.PRESENT,
+                    "confirmation_by_worker_id": confirmation["confirmed_by_worker_id"],
+                }
+            )
+            result = engine.process(payload.target_event_id, resumed_intent)
+
+        if result.state == RequestState.VERIFIED and repository.consume_failure_injection(payload.target_event_id):
+            run = repository.get_run(payload.run_id)
+            shift = run.shifts[resumed_intent.shift_id] if run and resumed_intent.shift_id else None
+            log_event(
+                LOGGER,
+                "lost_ack_after_verify_injected",
+                run_id=payload.run_id,
+                source_event_id=payload.target_event_id,
+                request_id=request_id,
+                task_name=task_name,
+                task_attempt=task_attempt,
+                resume_generation=payload.resume_generation,
+                shift_id=resumed_intent.shift_id,
+                workflow_status=RequestState.VERIFIED.value,
+                shift_version=shift.version if shift else None,
+                schedule_version=run.schedule_version if run else None,
+                operation="controlled_failure_injection",
+                result="LOST_ACK_AFTER_VERIFY_ONCE",
+            )
+            raise LostAcknowledgementAfterVerify("Judge Mode intentionally lost acknowledgement after VERIFIED")
         run = repository.get_run(payload.run_id)
         shift = run.shifts[resumed_intent.shift_id] if run and resumed_intent.shift_id else None
         log_event(

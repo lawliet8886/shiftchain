@@ -9,7 +9,12 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict
 
 from shiftchain.cloud_config import CloudConfig
-from shiftchain.cloud_workflow import CloudWorkflow, FutureGenerationError
+from shiftchain.cloud_workflow import (
+    CloudWorkflow,
+    FutureGenerationError,
+    IntegrityVerificationError,
+    LostAcknowledgementAfterVerify,
+)
 from shiftchain.oidc import OIDCAuthenticationError, OIDCAuthorizationError, OIDCValidator
 from shiftchain.tasks import ResumePayload
 
@@ -119,6 +124,10 @@ def resume_task(
             task_attempt=x_cloudtasks_taskretrycount,
         )
     except FutureGenerationError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except LostAcknowledgementAfterVerify as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except IntegrityVerificationError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

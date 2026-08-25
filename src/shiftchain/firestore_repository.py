@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from copy import deepcopy
 from datetime import datetime, timezone
+import hashlib
+import json
 import re
 from typing import Any, TypeVar
 
@@ -27,6 +29,7 @@ from shiftchain.models import (
     Worker,
 )
 from shiftchain.repository import ShiftChainRepository, initial_ledger_for
+from shiftchain.reliability import LOST_ACK_AFTER_VERIFY_ONCE, NoOpVerificationResult
 
 T = TypeVar("T")
 TransactionRunner = Callable[[Callable[[Any], T]], T]
@@ -404,7 +407,10 @@ class FirestoreRepository(ShiftChainRepository):
         if not snapshot.exists:
             return None
         raw = snapshot.to_dict()
-        if raw.get("event_type") == LedgerEventType.TRANSFER_VERIFIED.value:
+        if raw.get("event_type") in {
+            LedgerEventType.TRANSFER_VERIFIED.value,
+            LedgerEventType.NO_OP_VERIFIED.value,
+        }:
             return None
         return self._ledger_from_document(raw)
 
@@ -648,6 +654,236 @@ class FirestoreRepository(ShiftChainRepository):
             )
 
         self._transaction_runner(callback)
+
+    def configure_failure_injection(self, injection: str) -> bool:
+        """Explicitly enable the one supported reliability fault on a DEMO run."""
+        if injection != LOST_ACK_AFTER_VERIFY_ONCE:
+            raise ValueError("unsupported failure injection")
+        run_ref = self._run_ref()
+        configured_at = _utcnow()
+
+        def callback(transaction) -> bool:
+            snapshot = run_ref.get(transaction=transaction)
+            if not snapshot.exists:
+                raise RuntimeError("run not found")
+            raw = snapshot.to_dict()
+            if raw.get("mode") != "DEMO":
+                return False
+            transaction.update(
+                run_ref,
+                {
+                    "fault_injection": injection,
+                    "failure_injection_used": False,
+                    "failure_injection_configured_at": configured_at,
+                    "failure_injection_consumed_at": None,
+                    "updated_at": configured_at,
+                },
+            )
+            return True
+
+        return self._transaction_runner(callback)
+
+    def consume_failure_injection(self, target_event_id: str) -> bool:
+        """Atomically consume the lost-ack fault, but only after durable VERIFIED."""
+        run_ref = self._run_ref()
+        event_ref = self._event_ref(target_event_id)
+        consumed_at = _utcnow()
+
+        def callback(transaction) -> bool:
+            run_snapshot = run_ref.get(transaction=transaction)
+            event_snapshot = event_ref.get(transaction=transaction)
+            if not run_snapshot.exists or not event_snapshot.exists:
+                return False
+            run_doc = run_snapshot.to_dict()
+            event_doc = event_snapshot.to_dict()
+            verification_id = event_doc.get("verification_id")
+            if not verification_id:
+                return False
+            verification_snapshot = self._ledger_ref(verification_id).get(transaction=transaction)
+            eligible = (
+                run_doc.get("mode") == "DEMO"
+                and run_doc.get("fault_injection") == LOST_ACK_AFTER_VERIFY_ONCE
+                and run_doc.get("failure_injection_used") is False
+                and event_doc.get("request_id") == "REQ-003"
+                and event_doc.get("workflow_status") == RequestState.VERIFIED.value
+                and verification_snapshot.exists
+                and verification_snapshot.to_dict().get("event_type") == LedgerEventType.TRANSFER_VERIFIED.value
+            )
+            if not eligible:
+                return False
+            transaction.update(
+                run_ref,
+                {
+                    "failure_injection_used": True,
+                    "failure_injection_consumed_at": consumed_at,
+                    "failure_injection_target_event_id": target_event_id,
+                    "updated_at": consumed_at,
+                },
+            )
+            return True
+
+        return self._transaction_runner(callback)
+
+    def verify_existing_effect(
+        self,
+        target_event_id: str,
+        *,
+        resume_generation: int,
+        task_name: str | None,
+        task_attempt: str | None,
+    ) -> NoOpVerificationResult:
+        """Read before repeat and record deterministic non-custody evidence."""
+        run_ref = self._run_ref()
+        event_ref = self._event_ref(target_event_id)
+        ledger_collection = self._run_ref().collection("ledger")
+        evidence_id = f"noop:{target_event_id}:g{resume_generation}"
+        noop_ref = self._ledger_ref(evidence_id)
+        recorded_at = _utcnow()
+
+        def callback(transaction) -> NoOpVerificationResult:
+            run_snapshot = run_ref.get(transaction=transaction)
+            event_snapshot = event_ref.get(transaction=transaction)
+            noop_snapshot = noop_ref.get(transaction=transaction)
+            if not run_snapshot.exists or not event_snapshot.exists:
+                return NoOpVerificationResult(False, None, ("RUN_OR_EVENT_MISSING",))
+            run_doc = run_snapshot.to_dict()
+            event_doc = event_snapshot.to_dict()
+            intent = event_doc.get("intent") or {}
+            applied_id = event_doc.get("applied_ledger_id")
+            verification_id = event_doc.get("verification_id") or f"verify:{event_doc.get('request_id', '')}"
+            if not applied_id:
+                return NoOpVerificationResult(False, None, ("APPLIED_LEDGER_ID_MISSING",))
+            applied_snapshot = self._ledger_ref(applied_id).get(transaction=transaction)
+            verification_snapshot = self._ledger_ref(verification_id).get(transaction=transaction)
+            ledger_snapshots = list(ledger_collection.stream(transaction=transaction))
+            applied_doc = applied_snapshot.to_dict() if applied_snapshot.exists else {}
+            verification_doc = verification_snapshot.to_dict() if verification_snapshot.exists else {}
+            shift_id = intent.get("shift_id")
+            shift = (run_doc.get("shifts") or {}).get(shift_id, {})
+            predecessor_id = applied_doc.get("predecessor_id")
+            predecessor_snapshot = self._ledger_ref(predecessor_id).get(transaction=transaction) if predecessor_id else None
+            predecessor_doc = predecessor_snapshot.to_dict() if predecessor_snapshot and predecessor_snapshot.exists else {}
+            request_id = event_doc.get("request_id")
+            equivalent_applied = [
+                snapshot.to_dict()
+                for snapshot in ledger_snapshots
+                if snapshot.to_dict().get("event_type") == LedgerEventType.TRANSFER_APPLIED.value
+                and snapshot.to_dict().get("request_id") == request_id
+            ]
+            equivalent_verified = [
+                snapshot.to_dict()
+                for snapshot in ledger_snapshots
+                if snapshot.to_dict().get("event_type") == LedgerEventType.TRANSFER_VERIFIED.value
+                and snapshot.to_dict().get("request_id") == request_id
+            ]
+            expected_request_key = f"request:{self.run_id}:{request_id}"
+            expected_ledger_key = f"ledger:{self.run_id}:{request_id}"
+            checks = {
+                "request_verified": event_doc.get("workflow_status") == RequestState.VERIFIED.value,
+                "intent_present": bool(shift_id and intent.get("to_worker_id") and intent.get("from_worker_id")),
+                "applied_present": applied_snapshot.exists,
+                "applied_type": applied_doc.get("event_type") == LedgerEventType.TRANSFER_APPLIED.value,
+                "applied_request": applied_doc.get("request_id") == request_id,
+                "applied_workers": applied_doc.get("from_worker_id") == intent.get("from_worker_id") and applied_doc.get("to_worker_id") == intent.get("to_worker_id"),
+                "applied_shift": applied_doc.get("shift_id") == shift_id,
+                "verification_present": verification_snapshot.exists,
+                "verification_type": verification_doc.get("event_type") == LedgerEventType.TRANSFER_VERIFIED.value,
+                "verification_links_applied": verification_doc.get("predecessor_id") == applied_id,
+                "verification_versions": verification_doc.get("shift_version") == applied_doc.get("shift_version") and verification_doc.get("schedule_version") == applied_doc.get("schedule_version"),
+                "owner_matches": shift.get("current_owner_id") == intent.get("to_worker_id"),
+                "head_matches": shift.get("custody_head_event_id") == applied_id,
+                "shift_version_matches": shift.get("version") == applied_doc.get("shift_version"),
+                "schedule_version_matches": run_doc.get("schedule_version") == applied_doc.get("schedule_version"),
+                "predecessor_present": bool(predecessor_doc),
+                "predecessor_owner_matches": predecessor_doc.get("to_worker_id") == intent.get("from_worker_id"),
+                "request_idempotency_key": event_doc.get("idempotency_key") == expected_request_key,
+                "ledger_idempotency_key": applied_doc.get("idempotency_key") == expected_ledger_key,
+                "single_applied_effect": len(equivalent_applied) == 1,
+                "single_verification": len(equivalent_verified) == 1,
+            }
+            errors = tuple(name for name, passed in checks.items() if not passed)
+            if errors:
+                return NoOpVerificationResult(
+                    False,
+                    None,
+                    errors,
+                    shift.get("current_owner_id"),
+                    shift.get("version"),
+                    run_doc.get("schedule_version"),
+                    shift.get("custody_head_event_id"),
+                )
+            if not noop_snapshot.exists:
+                digest_payload = {
+                    "run_id": self.run_id,
+                    "request_id": request_id,
+                    "shift_id": shift_id,
+                    "resume_generation": resume_generation,
+                    "applied_id": applied_id,
+                    "verification_id": verification_id,
+                    "owner": shift["current_owner_id"],
+                    "shift_version": shift["version"],
+                    "schedule_version": run_doc["schedule_version"],
+                    "custody_head": shift["custody_head_event_id"],
+                }
+                evidence_digest = hashlib.sha256(
+                    json.dumps(digest_payload, sort_keys=True, separators=(",", ":")).encode()
+                ).hexdigest()
+                transaction.set(
+                    noop_ref,
+                    {
+                        "ledger_event_id": evidence_id,
+                        "record_type": LedgerEventType.NO_OP_VERIFIED.value,
+                        "event_type": LedgerEventType.NO_OP_VERIFIED.value,
+                        "run_id": self.run_id,
+                        "request_id": request_id,
+                        "source_event_id": target_event_id,
+                        "shift_id": shift_id,
+                        "resume_generation": resume_generation,
+                        "applied_ledger_event_id": applied_id,
+                        "verified_ledger_event_id": verification_id,
+                        "observed_owner_id": shift["current_owner_id"],
+                        "observed_shift_version": shift["version"],
+                        "observed_schedule_version": run_doc["schedule_version"],
+                        "custody_head_event_id": shift["custody_head_event_id"],
+                        "idempotency_key": f"noop:{self.run_id}:{target_event_id}:g{resume_generation}",
+                        "evidence_digest": evidence_digest,
+                        "task_name": task_name,
+                        "task_attempt": task_attempt,
+                        "occurred_at": recorded_at,
+                        "created_at": recorded_at,
+                    },
+                )
+                activity = list(event_doc.get("activity") or [])
+                activity.append(
+                    {
+                        "result": LedgerEventType.NO_OP_VERIFIED.value,
+                        "evidence_id": evidence_id,
+                        "resume_generation": resume_generation,
+                        "task_name": task_name,
+                        "task_attempt": task_attempt,
+                        "occurred_at": recorded_at,
+                    }
+                )
+                transaction.update(
+                    event_ref,
+                    {
+                        "activity": activity,
+                        "last_attempt": recorded_at,
+                        "last_result": LedgerEventType.NO_OP_VERIFIED.value,
+                        "updated_at": recorded_at,
+                    },
+                )
+            return NoOpVerificationResult(
+                True,
+                evidence_id,
+                (),
+                shift["current_owner_id"],
+                shift["version"],
+                run_doc["schedule_version"],
+                shift["custody_head_event_id"],
+            )
+
+        return self._transaction_runner(callback)
 
     def snapshot(self) -> dict[str, Any] | None:
         run_snapshot = self._run_ref().get()
