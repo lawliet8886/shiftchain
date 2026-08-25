@@ -1,0 +1,41 @@
+{
+  "release_candidate": "submission-rc1",
+  "canonical_label": "RUN-SUBMISSION-RC1",
+  "actual_run_id": "RUN-DEMO-007",
+  "started_at": "2026-08-25T16:10:32.4828753Z",
+  "completed_at": "2026-08-25T16:12:34.8970398Z",
+  "duration_seconds": 122.408,
+  "stage_latency_seconds": {
+    "evt_001": 32.007,
+    "evt_002": 32.194,
+    "evt_003": 18.781,
+    "evt_004": 15.079,
+    "post_evt_004_autonomous": 8.149
+  },
+  "backend": {
+    "gemini": "gemini-3.7-flash",
+    "agent": "shiftchain_agent",
+    "cloud_run": "shiftchain-demo",
+    "firestore_database": "shiftchain",
+    "cloud_tasks_queue": "shiftchain-resume",
+    "oidc": "real exact identity and audience",
+    "reliability_injection": "LOST_ACK_AFTER_VERIFY_ONCE"
+  },
+  "observations": {
+    "g1_wait_condition_not_met": true,
+    "chain_a": "Maya -> Liam -> Sofia",
+    "chain_b": "Noah -> Emma",
+    "schedule_version": 3,
+    "chain_a_shift_version": 2,
+    "chain_b_shift_version": 1,
+    "http_503_count": 1,
+    "transfer_applied_count_req_003": 1,
+    "transfer_verified_count_req_003": 1,
+    "noop_verified_count": 1,
+    "posts_or_clicks_after_evt_004": 0,
+    "duplicate_version": false,
+    "duplicate_custody": false,
+    "queue_depth_final": 0
+  },
+  "result": "PASS"
+}

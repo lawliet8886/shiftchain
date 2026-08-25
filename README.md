@@ -204,6 +204,6 @@ This hackathon MVP deliberately uses one synthetic organization, four frozen dem
 - English judge UI, real hosted application, architecture diagram and reproducible setup.
 - Real cloud execution and controlled reliability evidence; offline fixtures are not substituted in cloud rehearsals.
 - Synthetic data and local project provenance are disclosed.
-- No bonus-model integration, public repository, video upload or submission has been performed yet.
+- Public release-candidate repository prepared; no bonus-model integration, video upload or final Devpost submission has been performed.
 
 See [docs/JUDGING_MAP.md](docs/JUDGING_MAP.md), [PROJECT_PROVENANCE.md](PROJECT_PROVENANCE.md) and the phase gate artifacts for evidence.
